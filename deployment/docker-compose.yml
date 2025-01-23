@@ -1,0 +1,38 @@
+version: '3.8'
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql-db
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: sindhu_event_db
+      MYSQL_USER: sindhu_user
+      MYSQL_PASSWORD: yourpassword
+    networks:
+      - ssm-user_mynetwork  # Updated to match the existing network
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
+
+  springboot:
+    image: openjdk:23-jdk-slim
+    container_name: springboot-container
+    command: java -Xmx512m -jar /app/app.jar
+    networks:
+      - ssm-user_mynetwork  # Updated to match the existing network
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./sindhueventpay-0.0.1-SNAPSHOT.jar:/app/app.jar
+    depends_on:
+      - mysql
+
+networks:
+  ssm-user_mynetwork:
+    external: true  # This ensures the existing network is used
+
