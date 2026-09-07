@@ -70,6 +70,13 @@ public class PaymentService {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    private org.springframework.context.ApplicationContext applicationContext;
+
+    private PaymentService getSelf() {
+        return applicationContext.getBean(PaymentService.class);
+    }
+
     // ─────────────────────────────────────────────────────────────────────────
     // Frontend verify endpoint
     // ─────────────────────────────────────────────────────────────────────────
@@ -96,7 +103,7 @@ public class PaymentService {
                 request.getRazorpayOrderId(), request.getRazorpayPaymentId());
 
         // 2. Process the confirmed payment (idempotent)
-        return processPaymentCaptured(
+        return getSelf().processPaymentCaptured(
                 request.getRazorpayOrderId(),
                 request.getRazorpayPaymentId(),
                 request.getRazorpaySignature());
@@ -157,7 +164,7 @@ public class PaymentService {
                 log.info("Webhook payment.captured. orderId=[{}] paymentId=[{}] method=[{}]",
                         orderId, paymentId, method);
 
-                processPaymentCaptured(orderId, paymentId, null);
+                getSelf().processPaymentCaptured(orderId, paymentId, null);
                 // Note: webhook does not provide the client-facing signature, pass null
             }
             case "payment.failed" -> {
@@ -165,7 +172,7 @@ public class PaymentService {
                         .path("payload").path("payment").path("entity");
                 String orderId = paymentEntity.path("order_id").asText();
                 log.info("Webhook payment.failed. orderId=[{}]", orderId);
-                handlePaymentFailed(orderId);
+                getSelf().handlePaymentFailed(orderId);
             }
             default -> log.debug("Unhandled webhook event type: [{}]", eventType);
         }

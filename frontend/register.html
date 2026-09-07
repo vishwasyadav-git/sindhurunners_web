@@ -122,6 +122,54 @@
         }
         @media (max-width: 700px) { .grid { grid-template-columns: 1fr; } }
 
+        /* ─── Event Selection Grid ──────────────────────────────────────────── */
+        .event-catalog {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 24px;
+            margin-top: 20px;
+        }
+        .event-card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--card-shadow);
+            backdrop-filter: blur(6px);
+            border: 1px solid rgba(255,255,255,0.6);
+            padding: 24px;
+            transition: all var(--transition);
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+        }
+        .event-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 48px rgba(26,111,196,0.2);
+            border-color: var(--primary-light);
+        }
+        .event-card h3 {
+            font-family: 'Roboto Condensed', sans-serif;
+            font-size: 1.3rem;
+            color: var(--primary-dark);
+            margin-bottom: 12px;
+        }
+        .event-card p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .event-card .fee {
+            margin-top: auto;
+            padding-top: 16px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--success);
+        }
+
         /* ─── Card ──────────────────────────────────────────────────────────── */
         .card {
             background: var(--card-bg);
@@ -527,8 +575,30 @@
     <h1 class="page-title" id="pageTitle">Event Registration</h1>
     <p class="page-subtitle">Complete the form below to register for the event.</p>
 
-    <!-- Step indicators -->
-    <div class="steps" role="list">
+    <!-- Event Selection Flow -->
+    <div id="eventSelectionFlow" style="display: none;">
+        <div id="catalogSkeleton" class="event-catalog">
+            <div class="event-card event-skeleton">
+                <div class="skeleton-line" style="height:24px; width:80%;"></div>
+                <div class="skeleton-line" style="height:14px; width:60%;"></div>
+                <div class="skeleton-line" style="height:14px; width:50%;"></div>
+                <div class="skeleton-line" style="height:20px; width:40%; margin-top:16px;"></div>
+            </div>
+            <div class="event-card event-skeleton">
+                <div class="skeleton-line" style="height:24px; width:80%;"></div>
+                <div class="skeleton-line" style="height:14px; width:60%;"></div>
+                <div class="skeleton-line" style="height:14px; width:50%;"></div>
+                <div class="skeleton-line" style="height:20px; width:40%; margin-top:16px;"></div>
+            </div>
+        </div>
+        <div id="catalogError" class="alert alert-error" style="display: none; margin-top: 20px;"></div>
+        <div id="catalogGrid" class="event-catalog"></div>
+    </div>
+
+    <!-- Registration Flow -->
+    <div id="registrationFlow" style="display: none;">
+        <!-- Step indicators -->
+        <div class="steps" role="list">
         <div class="step active" id="step1" role="listitem">
             <div class="step-circle">1</div>
             <div class="step-label">Details</div>
@@ -723,11 +793,14 @@
             </div>
         </section>
     </div>
+    </div>
 </main>
 
 <script>
     // ─── Configuration ──────────────────────────────────────────────────────
-    const API_BASE = '/api/v1';
+    const API_BASE = (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost') && window.location.port !== '8080'
+        ? 'http://localhost:8080/api/v1'
+        : '/api/v1';
 
     // ─── Utilities ──────────────────────────────────────────────────────────
     const $ = id => document.getElementById(id);
@@ -790,20 +863,71 @@
         });
     }
 
-    // ─── Step 1: Load Event ──────────────────────────────────────────────────
+    // ─── Routing ─────────────────────────────────────────────────────────────
     const eventCode = getEventCode();
+
+    if (eventCode) {
+        $('registrationFlow').style.display = 'block';
+        loadEvent(eventCode);
+    } else {
+        $('pageTitle').textContent = 'Select an Event';
+        document.title = 'Events | Sindhu Runners';
+        $('eventSelectionFlow').style.display = 'block';
+        loadAllEvents();
+    }
+
+    // ─── Load All Events ─────────────────────────────────────────────────────
+    async function loadAllEvents() {
+        try {
+            const res = await fetch(`${API_BASE}/events`);
+            const json = await res.json();
+            
+            $('catalogSkeleton').style.display = 'none';
+
+            if (!res.ok || !json.success) {
+                $('catalogError').textContent = json.message || 'Failed to load events.';
+                $('catalogError').style.display = 'block';
+                return;
+            }
+
+            const events = json.data;
+            if (events.length === 0) {
+                $('catalogError').textContent = 'No events are currently open for registration.';
+                $('catalogError').style.display = 'block';
+                $('catalogError').className = 'alert alert-info';
+                return;
+            }
+
+            const grid = $('catalogGrid');
+            events.forEach(evt => {
+                const card = document.createElement('a');
+                card.className = 'event-card';
+                card.href = `?event=${encodeURIComponent(evt.eventCode)}`;
+                
+                const startDate = formatDate(evt.startDate);
+                
+                card.innerHTML = `
+                    <h3>${evt.eventName}</h3>
+                    <p>📅 ${startDate}</p>
+                    <p>🎟️ ${evt.availableSlots} slots left</p>
+                    <div class="fee">${formatCurrency(evt.registrationFee, evt.currency)}</div>
+                `;
+                grid.appendChild(card);
+            });
+
+        } catch (err) {
+            $('catalogSkeleton').style.display = 'none';
+            $('catalogError').textContent = 'Error connecting to the server.';
+            $('catalogError').style.display = 'block';
+        }
+    }
+
+    // ─── Step 1: Load Event ──────────────────────────────────────────────────
     let eventData = null;
 
-    async function loadEvent() {
-        if (!eventCode) {
-            $('eventSkeleton').style.display = 'none';
-            $('eventLoadError').style.display = 'block';
-            $('registerBtn').disabled = true;
-            return;
-        }
-
+    async function loadEvent(code) {
         try {
-            const res = await fetch(`${API_BASE}/events/${encodeURIComponent(eventCode)}`);
+            const res = await fetch(`${API_BASE}/events/${encodeURIComponent(code)}`);
             const json = await res.json();
 
             $('eventSkeleton').style.display = 'none';

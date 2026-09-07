@@ -98,17 +98,15 @@ public class RegistrationService {
         // 2. Validate input
         validateInput(fullName, email, mobileNumber);
 
-        // 3. Create registration record first to get the UUID (used as S3 key segment)
+        // 3. Generate UUID for registration (used as S3 key segment and Razorpay receipt)
         Registration registration = new Registration();
-        // @PrePersist will populate registration.id
+        registration.setId(java.util.UUID.randomUUID().toString());
         registration.setEventId(event.getId());
         registration.setFullName(fullName.trim());
         registration.setEmail(email.trim().toLowerCase());
         registration.setMobileNumber(mobileNumber.trim());
         registration.setStatus(RegistrationStatus.PENDING_PAYMENT);
 
-        // Save to generate UUID (needed for S3 key before upload)
-        registration = registrationRepository.save(registration);
         String registrationId = registration.getId();
 
         log.info("Registration initiated. id=[{}] eventCode=[{}] email=[REDACTED]",
@@ -125,7 +123,7 @@ public class RegistrationService {
             razorpayOrder = razorpayService.createOrder(registrationId, amountInPaise, event.getCurrency());
         } catch (Exception e) {
             // Razorpay order failed — clean up the S3 document
-            s3Service.deleteDocument(s3Key);
+//            s3Service.deleteDocument(s3Key);
             throw e;
         }
 

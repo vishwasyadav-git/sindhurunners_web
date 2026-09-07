@@ -6,7 +6,7 @@
 
 CREATE TABLE IF NOT EXISTS payments (
     id                      BIGINT          NOT NULL AUTO_INCREMENT,
-    registration_id         CHAR(36)        NOT NULL                COMMENT 'FK → registrations.id',
+    registration_id         VARCHAR(50)         NOT NULL                COMMENT 'FK → registrations.id',
     razorpay_order_id       VARCHAR(100)    NOT NULL                COMMENT 'Razorpay order_id; matches registrations.razorpay_order_id',
     razorpay_payment_id     VARCHAR(100)    DEFAULT NULL            COMMENT 'Razorpay pay_xxx; set only after payment captured. NULL initially.',
     razorpay_signature      VARCHAR(512)    DEFAULT NULL            COMMENT 'HMAC signature from Razorpay for audit trail',

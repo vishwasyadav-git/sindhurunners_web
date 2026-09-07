@@ -5,7 +5,7 @@
 -- razorpay_order_id is set at creation (PENDING_PAYMENT) and must be unique.
 
 CREATE TABLE IF NOT EXISTS registrations (
-    id                  CHAR(36)        NOT NULL                COMMENT 'Internal UUID primary key; safe to share in URLs but not meaningful to users',
+    id                  VARCHAR(36)        NOT NULL                COMMENT 'Internal UUID primary key; safe to share in URLs but not meaningful to users',
     event_id            BIGINT          NOT NULL                COMMENT 'FK → events.id',
     registration_number VARCHAR(50)     DEFAULT NULL            COMMENT 'Human-readable event-specific ID, e.g. EVT2026-000042. NULL until PAID.',
     full_name           VARCHAR(100)    NOT NULL                COMMENT 'Registrant full name',
