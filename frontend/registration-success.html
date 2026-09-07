@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration Confirmed — Sindhu Runners</title>
+    <meta name="description" content="Your Sindhu Runners event registration is confirmed.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --success:      #27ae60;
+            --success-dark: #1e8449;
+            --primary:      #1a6fc4;
+            --text:         #1c2333;
+            --text-muted:   #5a6478;
+            --border:       #d4dce8;
+            --bg-start:     #b8d9f0;
+            --bg-mid:       #aee6d8;
+            --bg-end:       #add8e6;
+            --card-shadow:  0 12px 50px rgba(26,111,196,0.15), 0 3px 12px rgba(0,0,0,0.08);
+            --radius:       20px;
+            --radius-sm:    10px;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(160deg, var(--bg-start) 0%, var(--bg-mid) 50%, var(--bg-end) 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            color: var(--text);
+        }
+
+        /* Header */
+        .site-header {
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .site-header img { height: 44px; }
+        .site-header h1 {
+            font-family: 'Roboto Condensed', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        /* Main */
+        .page-wrapper {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        .card {
+            background: rgba(255,255,255,0.95);
+            border-radius: var(--radius);
+            box-shadow: var(--card-shadow);
+            border: 1px solid rgba(255,255,255,0.7);
+            max-width: 560px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        /* Success banner */
+        .success-banner {
+            background: linear-gradient(135deg, var(--success) 0%, #2ecc71 100%);
+            padding: 40px 32px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .success-banner::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='20'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+        .checkmark-circle {
+            width: 90px;
+            height: 90px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            border: 3px solid rgba(255,255,255,0.4);
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        @keyframes popIn {
+            0%   { transform: scale(0); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .checkmark-circle svg {
+            width: 48px;
+            height: 48px;
+        }
+        .success-title {
+            font-family: 'Roboto Condensed', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+        .success-sub {
+            color: rgba(255,255,255,0.88);
+            font-size: 0.95rem;
+        }
+
+        /* Card body */
+        .card-body { padding: 32px; }
+
+        /* Registration ID highlight */
+        .reg-id-block {
+            background: linear-gradient(135deg, #f0f8ff 0%, #e8f5ff 100%);
+            border: 2px solid var(--primary);
+            border-radius: var(--radius-sm);
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 28px;
+            position: relative;
+        }
+        .reg-id-label {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 6px;
+        }
+        .reg-id-number {
+            font-family: 'Roboto Condensed', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+            letter-spacing: 2px;
+            word-break: break-all;
+        }
+        .reg-id-copy {
+            background: none;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            border-radius: 6px;
+            padding: 4px 12px;
+            font-size: 0.78rem;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: all 0.2s;
+        }
+        .reg-id-copy:hover {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        /* Details list */
+        .details-list { margin-bottom: 28px; }
+        .details-row {
+            display: flex;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f4f8;
+        }
+        .details-row:last-child { border-bottom: none; }
+        .details-icon { font-size: 1.2rem; width: 32px; flex-shrink: 0; }
+        .details-label {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 2px;
+        }
+        .details-value {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        /* Status badge */
+        .status-pill {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--success), #2ecc71);
+            color: #fff;
+            border-radius: 50px;
+            padding: 4px 16px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        /* Actions */
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .btn {
+            flex: 1;
+            min-width: 140px;
+            padding: 13px 20px;
+            border-radius: var(--radius-sm);
+            font-family: 'Roboto Condensed', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-align: center;
+            text-decoration: none;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), #1a8fc4);
+            color: #fff;
+        }
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(26,111,196,0.35);
+        }
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--border);
+            color: var(--text-muted);
+        }
+        .btn-outline:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* Important note */
+        .note-box {
+            background: #fff8e8;
+            border: 1px solid #f0d080;
+            border-radius: var(--radius-sm);
+            padding: 14px 16px;
+            font-size: 0.82rem;
+            color: #7a5c00;
+            line-height: 1.6;
+            margin-bottom: 24px;
+        }
+        .note-box strong { color: #5a3c00; }
+
+        /* Status polling for non-PAID registrations */
+        .polling-state {
+            text-align: center;
+            padding: 20px 0;
+        }
+        .polling-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #e8f1fc;
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 12px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 20px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        @media (max-width: 480px) {
+            .card-body { padding: 20px; }
+            .reg-id-number { font-size: 1.5rem; }
+            .success-title { font-size: 1.4rem; }
+        }
+    </style>
+</head>
+<body>
+
+<header class="site-header">
+    <img src="images/SindhuRunnerLogo02-04.png" alt="Sindhu Runners">
+    <h1>Sindhu Runners</h1>
+</header>
+
+<main class="page-wrapper">
+    <div class="card">
+
+        <!-- Default: polling state (shown while waiting for data) -->
+        <div id="pollingView" class="card-body">
+            <div class="polling-state">
+                <div class="polling-spinner"></div>
+                <p style="color:var(--text-muted);font-size:0.9rem;">Confirming your registration…</p>
+            </div>
+        </div>
+
+        <!-- Success state (shown after confirmed PAID) -->
+        <div id="successView" style="display:none">
+            <div class="success-banner">
+                <div class="checkmark-circle" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                </div>
+                <div class="success-title">Registration Confirmed! 🎉</div>
+                <div class="success-sub">Your spot is secured. See you at the finish line!</div>
+            </div>
+
+            <div class="card-body">
+
+                <!-- Registration Number highlight -->
+                <div class="reg-id-block">
+                    <div class="reg-id-label">Your Registration ID</div>
+                    <div class="reg-id-number" id="regNumberDisplay">—</div>
+                    <button class="reg-id-copy" id="copyBtn" onclick="copyRegId()">📋 Copy</button>
+                </div>
+
+                <!-- Details -->
+                <div class="details-list">
+                    <div class="details-row">
+                        <div class="details-icon">🏃</div>
+                        <div>
+                            <div class="details-label">Event</div>
+                            <div class="details-value" id="detailEvent">—</div>
+                        </div>
+                    </div>
+                    <div class="details-row">
+                        <div class="details-icon">👤</div>
+                        <div>
+                            <div class="details-label">Registrant</div>
+                            <div class="details-value" id="detailName">—</div>
+                        </div>
+                    </div>
+                    <div class="details-row">
+                        <div class="details-icon">💳</div>
+                        <div>
+                            <div class="details-label">Amount Paid</div>
+                            <div class="details-value" id="detailAmount">—</div>
+                        </div>
+                    </div>
+                    <div class="details-row">
+                        <div class="details-icon">✅</div>
+                        <div>
+                            <div class="details-label">Payment Status</div>
+                            <div class="details-value">
+                                <span class="status-pill">PAID</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Important note -->
+                <div class="note-box">
+                    📬 <strong>Please save your Registration ID.</strong>
+                    You will need it on the day of the event for check-in.
+                    For any queries, contact us at
+                    <a href="mailto:sindhurunners@gmail.com" style="color:#7a5c00;">sindhurunners@gmail.com</a>.
+                </div>
+
+                <!-- Actions -->
+                <div class="action-buttons">
+                    <a href="index.html" class="btn btn-primary">🏠 Back to Home</a>
+                    <button class="btn btn-outline" onclick="window.print()">🖨️ Print / Save</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pending / Error state -->
+        <div id="pendingView" style="display:none">
+            <div class="card-body" style="text-align:center;padding:40px 32px;">
+                <div style="font-size:3rem;margin-bottom:16px;">⏳</div>
+                <div style="font-family:'Roboto Condensed',sans-serif;font-size:1.3rem;font-weight:700;margin-bottom:10px;color:var(--text)">
+                    Payment Processing
+                </div>
+                <p style="color:var(--text-muted);font-size:0.9rem;line-height:1.7;margin-bottom:24px;">
+                    Your payment is being verified. This may take a few moments.
+                    If you completed payment, your registration will be confirmed shortly.
+                </p>
+                <button class="btn btn-primary" onclick="pollStatus()" id="refreshBtn" style="max-width:200px;margin:0 auto;">
+                    🔄 Refresh Status
+                </button>
+                <p style="margin-top:16px;font-size:0.78rem;color:var(--text-muted)">
+                    If this persists after 5 minutes, please contact support.
+                </p>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<footer>
+    © 2025 Sindhu Runners. All rights reserved.
+</footer>
+
+<script>
+    const API_BASE = '/api/v1';
+
+    // Parse URL params (set by register.html after payment)
+    const params     = new URLSearchParams(window.location.search);
+    const regId      = params.get('regId')  || '';
+    const regNum     = params.get('regNum') || '';
+    const eventName  = params.get('event')  || 'Sindhu Runners Event';
+    const name       = params.get('name')   || '';
+    const amount     = params.get('amount') || '';
+    const status     = params.get('status') || '';
+
+    function formatCurrency(amt) {
+        if (!amt) return '—';
+        return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 0 }).format(amt);
+    }
+
+    function showSuccess(registrationNumber, evtName, regName, regAmount) {
+        document.getElementById('pollingView').style.display = 'none';
+        document.getElementById('pendingView').style.display = 'none';
+        document.getElementById('successView').style.display = 'block';
+
+        document.getElementById('regNumberDisplay').textContent = registrationNumber || '—';
+        document.getElementById('detailEvent').textContent = evtName || '—';
+        document.getElementById('detailName').textContent  = regName || '—';
+        document.getElementById('detailAmount').textContent = formatCurrency(regAmount);
+        document.title = 'Registered! ' + (registrationNumber || '') + ' — Sindhu Runners';
+    }
+
+    function showPending() {
+        document.getElementById('pollingView').style.display = 'none';
+        document.getElementById('successView').style.display = 'none';
+        document.getElementById('pendingView').style.display = 'block';
+    }
+
+    // Try to show success immediately if params are available
+    if (status === 'PAID' && regNum) {
+        showSuccess(regNum, eventName, name, amount);
+    } else if (regId) {
+        // Poll the registration status endpoint
+        pollStatus();
+    } else {
+        showPending();
+    }
+
+    let pollCount = 0;
+    async function pollStatus() {
+        if (!regId) { showPending(); return; }
+        pollCount++;
+
+        try {
+            const res  = await fetch(`${API_BASE}/registrations/${encodeURIComponent(regId)}`);
+            const json = await res.json();
+
+            if (res.ok && json.success && json.data) {
+                const d = json.data;
+                if (d.status === 'PAID' && d.registrationNumber) {
+                    showSuccess(d.registrationNumber, d.eventName, d.fullName, d.amount);
+                    return;
+                }
+            }
+
+            // Not yet PAID — show pending state and auto-retry (up to 8 times)
+            showPending();
+            if (pollCount < 8) {
+                setTimeout(pollStatus, 3000);
+            }
+
+        } catch {
+            showPending();
+        }
+    }
+
+    function copyRegId() {
+        const text = document.getElementById('regNumberDisplay').textContent;
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = document.getElementById('copyBtn');
+                btn.textContent = '✅ Copied!';
+                setTimeout(() => { btn.textContent = '📋 Copy'; }, 2000);
+            });
+        }
+    }
+</script>
+</body>
+</html>

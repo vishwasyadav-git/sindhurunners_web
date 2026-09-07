@@ -1,5 +1,7 @@
 version: '3.8'
+
 services:
+
   mysql:
     image: mysql:8.0
     container_name: mysql-db
@@ -9,30 +11,58 @@ services:
       MYSQL_USER: sindhu_user
       MYSQL_PASSWORD: yourpassword
     networks:
-      - ssm-user_mynetwork  # Updated to match the existing network
+      - ssm-user_mynetwork
     ports:
       - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql      # persist data across restarts
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "sindhu_user", "-pyourpassword"]
       interval: 10s
       retries: 5
       start_period: 30s
       timeout: 10s
 
   springboot:
-    image: openjdk:23-jdk-slim
+    image: openjdk:21-jdk-slim
     container_name: springboot-container
     command: java -Xmx512m -jar /app/app.jar
     networks:
-      - ssm-user_mynetwork  # Updated to match the existing network
+      - ssm-user_mynetwork
     ports:
       - "8080:8080"
     volumes:
       - ./sindhueventpay-0.0.1-SNAPSHOT.jar:/app/app.jar
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy     # wait for MySQL to pass healthcheck
+    environment:
+      # ── Database ──────────────────────────────────────────────────
+      DATABASE_URL: jdbc:mysql://mysql-db:3306/sindhu_event_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      DATABASE_USERNAME: sindhu_user
+      DATABASE_PASSWORD: yourpassword
+
+      # ── Razorpay ──────────────────────────────────────────────────
+      # Replace with your actual keys from razorpay.com/dashboard
+      RAZORPAY_KEY_ID: ${RAZORPAY_KEY_ID:-rzp_test_REPLACE_ME}
+      RAZORPAY_KEY_SECRET: ${RAZORPAY_KEY_SECRET:-REPLACE_ME}
+      RAZORPAY_WEBHOOK_SECRET: ${RAZORPAY_WEBHOOK_SECRET:-REPLACE_ME}
+
+      # ── AWS S3 ────────────────────────────────────────────────────
+      # Leave AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY blank in production
+      # when running on EC2/ECS with an IAM role attached.
+      AWS_REGION: ${AWS_REGION:-ap-south-1}
+      AWS_S3_BUCKET: ${AWS_S3_BUCKET:-sindhu-runners-aadhaar-documents}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
+
+      # ── CORS ──────────────────────────────────────────────────────
+      # Set to your exact frontend URL in production
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:3000,http://localhost:8080}
+
+volumes:
+  mysql_data:
 
 networks:
   ssm-user_mynetwork:
-    external: true  # This ensures the existing network is used
-
+    external: true

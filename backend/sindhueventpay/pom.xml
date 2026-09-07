@@ -12,7 +12,7 @@
     <artifactId>sindhueventpay</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>sindhueventpay</name>
-    <description>sindhueventpay</description>
+    <description>Sindhu Runners Event Registration with Razorpay Payment</description>
     <url/>
     <licenses>
         <license/>
@@ -26,10 +26,28 @@
         <tag/>
         <url/>
     </scm>
+
     <properties>
         <java.version>21</java.version>
+        <aws.sdk.version>2.26.31</aws.sdk.version>
     </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- AWS SDK v2 BOM — manages all AWS SDK module versions -->
+            <dependency>
+                <groupId>software.amazon.awssdk</groupId>
+                <artifactId>bom</artifactId>
+                <version>${aws.sdk.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
+
+        <!-- ===== Spring Boot Core ===== -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
@@ -39,27 +57,82 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
+        <!-- Bean Validation (JSR-380): @NotBlank, @Email, @Pattern etc. -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+
+        <!-- Actuator: /actuator/health, /actuator/info for monitoring -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
+        <!-- ===== Database ===== -->
+        <!-- MySQL 8 connector -->
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>8.0.33</version>
+        </dependency>
+
+        <!-- Flyway Core: DB schema migration framework -->
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+        </dependency>
+
+        <!-- Flyway MySQL dialect support (required for MySQL 8+ with newer Flyway) -->
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-mysql</artifactId>
+        </dependency>
+
+        <!-- ===== AWS S3 ===== -->
+        <!-- AWS SDK v2 S3: private bucket upload, presigned URLs -->
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>s3</artifactId>
+        </dependency>
+
+        <!-- AWS SDK v2 STS: for assumed-role/IAM-based credential resolution -->
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>sts</artifactId>
+        </dependency>
+
+        <!-- ===== Razorpay ===== -->
+        <!-- Official Razorpay Java SDK: order creation, payment management -->
+        <dependency>
+            <groupId>com.razorpay</groupId>
+            <artifactId>razorpay-java</artifactId>
+            <version>1.4.5</version>
+        </dependency>
+
+        <!-- ===== File Validation ===== -->
+        <!-- Apache Tika Core: MIME type detection from file content (not just extension) -->
+        <dependency>
+            <groupId>org.apache.tika</groupId>
+            <artifactId>tika-core</artifactId>
+            <version>2.9.2</version>
+        </dependency>
+
+        <!-- ===== Utilities ===== -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>1.18.24</version>
             <scope>provided</scope>
         </dependency>
+
+        <!-- ===== Testing ===== -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <version>8.0.33</version>
-        </dependency>
-        <dependency>
-            <groupId>com.microsoft.sqlserver</groupId>
-            <artifactId>mssql-jdbc</artifactId>
-            <version>11.2.3.jre17</version> <!-- Use the latest version compatible with your project -->
-        </dependency>
+
     </dependencies>
 
     <build>

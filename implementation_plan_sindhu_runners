@@ -1,0 +1,548 @@
+# Event Registration Module — Implementation Plan
+
+## 1. Existing Architecture Analysis
+
+### What exists today
+
+| Dimension | Current State |
+|---|---|
+| **Language / Runtime** | Java 21 |
+| **Framework** | Spring Boot 3.4.1 |
+| **ORM / Data Access** | Spring Data JPA + Hibernate (`spring-boot-starter-data-jpa`) |
+| **Database** | MySQL 8.0 (via Docker, `sindhu_event_db`) |
+| **DB driver(s)** | mysql-connector-java 8.0.33 (also mssql-jdbc present but not configured) |
+| **Schema management** | `ddl-auto=update` — **no migration tool in use** |
+| **Build tool** | Maven (with Maven Wrapper) |
+| **Boilerplate reduction** | Lombok 1.18.24 |
+| **Logging** | Default Spring Boot (Logback) |
+| **Testing framework** | JUnit 5 + `spring-boot-starter-test` (Mockito included) |
+| **Authentication / Security** | **None** — no Spring Security, no JWT, no sessions |
+| **API convention** | REST, mixed paths `/api/events`, `/api/register`, `/api/register-event` |
+| **Error handling** | `@ControllerAdvice` → `GlobalExceptionHandler` with `ResourceNotFoundException` |
+| **Configuration** | `application.properties` — credentials hardcoded (not production-safe) |
+| **Frontend** | Vanilla HTML + CSS + JS (single `index.html`, AOS animations, Google Fonts) |
+| **Deployment** | Docker Compose (MySQL + Spring Boot JAR) on an external Docker network |
+| **Package structure** | `com.sindhueventpay.{controllers, models, services, Repository, exceptions}` |
+
+### Existing entities (skeletal — not production-ready)
+
+| Entity | Fields | Issues |
+|---|---|---|
+| `Event` | `id`, `eventName`, `date`, `registrationFee` | Missing: `eventCode`, `maxRegistrations`, `registrationOpen`, timestamps, currency |
+| `Registration` | `id`, `userId`, `eventId`, `paymentStatus`, `email` | Uses `Long` PK, no UUID, no `fullName`, `mobileNumber`, `aadhaarS3Key`, no enum for status |
+| `User` | `id`, `name`, `email`, `phone` | Separate entity; can be kept but not needed for new flow |
+| `Payment` | **Does not exist** | Must be created |
+
+### Gap summary
+
+- No Razorpay integration at all
+- No AWS S3 integration
+- No migration tool (must add Flyway)
+- No Spring Security / CORS config
+- No concurrency protection on registration counts
+- No idempotency on any operation
+- No structured logging / correlation IDs
+- Credentials hardcoded in `application.properties`
+- `ddl-auto=update` is dangerous in production
+
+---
+
+## 2. Proposed Architecture
+
+```
+frontend/
+  index.html                  ← existing landing page (UNTOUCHED)
+  register.html               ← NEW: event registration page
+  registration-success.html   ← NEW: success page
+
+backend/sindhueventpay/
+  src/main/java/com/sindhueventpay/
+    config/                   ← NEW
+      CorsConfig.java
+      RazorpayConfig.java
+      S3Config.java
+    models/                   ← EXPAND existing
+      Event.java              ← REWRITE (extend with full fields)
+      Registration.java       ← REWRITE (UUID PK, enum status, full fields)
+      Payment.java            ← NEW
+      User.java               ← KEEP AS-IS (untouched)
+    enums/                    ← NEW
+      RegistrationStatus.java
+      PaymentStatus.java
+    dto/                      ← NEW
+      RegistrationRequest.java
+      RegistrationResponse.java
+      PaymentVerifyRequest.java
+      PaymentWebhookRequest.java
+      ApiResponse.java
+      EventResponse.java
+    Repository/               ← EXPAND existing
+      EventRepository.java    ← EXTEND (add findByEventCode)
+      RegistrationRepository.java ← REWRITE (UUID PK, custom queries)
+      PaymentRepository.java  ← NEW
+      UserRepository.java     ← KEEP AS-IS
+    exceptions/               ← EXPAND
+      GlobalExceptionHandler.java  ← REWRITE (structured error body)
+      ResourceNotFoundException.java ← KEEP
+      EventFullException.java       ← NEW
+      EventClosedException.java     ← NEW
+      DuplicateRegistrationException.java ← NEW
+      PaymentVerificationException.java   ← NEW
+      S3UploadException.java        ← NEW
+    services/                 ← EXPAND
+      RegistrationService.java ← REWRITE
+      PaymentService.java      ← NEW
+      RazorpayService.java     ← NEW
+      S3Service.java           ← NEW
+      EventService.java        ← NEW
+    controllers/              ← EXPAND
+      EventController.java        ← REWRITE (v1 path, eventCode-based)
+      RegistrationController.java ← REWRITE
+      PaymentController.java      ← NEW
+    filter/                   ← NEW
+      RequestCorrelationFilter.java
+  src/main/resources/
+    application.properties    ← REWRITE (no hardcoded secrets, env vars)
+    db/migration/             ← NEW (Flyway scripts)
+      V1__create_events_table.sql
+      V2__create_registrations_table.sql
+      V3__create_payments_table.sql
+      V4__add_indexes.sql
+  src/test/java/com/sindhueventpay/
+    services/
+      RegistrationServiceTest.java  ← NEW
+      PaymentServiceTest.java       ← NEW
+      RazorpayServiceTest.java      ← NEW
+      S3ServiceTest.java            ← NEW
+    controllers/
+      RegistrationControllerTest.java ← NEW
+      PaymentControllerTest.java      ← NEW
+    integration/
+      RegistrationIntegrationTest.java ← NEW
+
+deployment/
+  docker-compose.yml          ← UPDATE (add env vars, healthchecks)
+  .env.example                ← NEW
+```
+
+---
+
+## 3. Database Schema (ER Diagram)
+
+```mermaid
+erDiagram
+    EVENT {
+        BIGINT id PK "AUTO_INCREMENT"
+        VARCHAR event_code UK "NOT NULL, unique"
+        VARCHAR event_name "NOT NULL"
+        TEXT description
+        DECIMAL registration_fee "NOT NULL"
+        VARCHAR currency "DEFAULT 'INR'"
+        INT max_registrations "NOT NULL"
+        INT registration_count "DEFAULT 0"
+        TINYINT registration_open "DEFAULT 1"
+        DATE start_date
+        DATE end_date
+        DATETIME created_at
+        DATETIME updated_at
+    }
+
+    REGISTRATION {
+        CHAR(36) id PK "UUID, NOT NULL"
+        BIGINT event_id FK "→ EVENT.id, NOT NULL, indexed"
+        VARCHAR registration_number UK "nullable until PAID"
+        VARCHAR full_name "NOT NULL"
+        VARCHAR email "NOT NULL, indexed"
+        VARCHAR mobile_number "NOT NULL, indexed"
+        VARCHAR status "PENDING_PAYMENT|PAYMENT_PROCESSING|PAID|PAYMENT_FAILED|CANCELLED"
+        VARCHAR aadhaar_s3_key "nullable until PAID"
+        VARCHAR razorpay_order_id "NOT NULL (set at creation)"
+        DATETIME created_at
+        DATETIME updated_at
+    }
+
+    PAYMENT {
+        BIGINT id PK "AUTO_INCREMENT"
+        CHAR(36) registration_id FK "→ REGISTRATION.id, indexed"
+        VARCHAR razorpay_order_id UK "NOT NULL"
+        VARCHAR razorpay_payment_id UK "nullable until captured"
+        VARCHAR razorpay_signature
+        DECIMAL amount "NOT NULL"
+        VARCHAR currency "NOT NULL"
+        VARCHAR status "CREATED|AUTHORIZED|CAPTURED|FAILED|REFUNDED"
+        VARCHAR payment_method
+        DATETIME paid_at
+        DATETIME created_at
+        DATETIME updated_at
+    }
+
+    EVENT ||--o{ REGISTRATION : "has many"
+    REGISTRATION ||--o| PAYMENT : "has one"
+```
+
+---
+
+## 4. API Design
+
+### `GET /api/v1/events/{eventCode}`
+Returns event details for the registration page.
+
+**Response 200:**
+```json
+{
+  "success": true,
+  "data": {
+    "eventCode": "EVT2026",
+    "eventName": "Goa to Sawantwadi Intercity Run 2026",
+    "description": "...",
+    "registrationFee": 500.00,
+    "currency": "INR",
+    "startDate": "2026-04-30",
+    "endDate": "2026-04-30",
+    "registrationOpen": true,
+    "availableSlots": 850
+  }
+}
+```
+
+**Error 404:** `EVENT_NOT_FOUND`  
+**Error 400:** `EVENT_REGISTRATION_CLOSED` / `EVENT_FULL`
+
+---
+
+### `POST /api/v1/events/{eventCode}/registrations`
+Multipart form. Creates `PENDING_PAYMENT` registration and Razorpay order.
+
+**Request (multipart/form-data):**
+```
+fullName:      string (required, 2–100 chars)
+email:         string (valid email, max 150 chars)
+mobileNumber:  string (10-digit Indian mobile)
+aadhaarDocument: file (jpg/jpeg/png/pdf, max 5 MB)
+```
+
+**Response 201:**
+```json
+{
+  "success": true,
+  "data": {
+    "registrationId": "8d8c7c3a-...",
+    "razorpayOrderId": "order_xxx",
+    "razorpayKeyId": "rzp_test_xxx",
+    "amount": 50000,
+    "currency": "INR",
+    "eventName": "...",
+    "fullName": "..."
+  }
+}
+```
+
+**Errors:** `EVENT_NOT_FOUND`, `EVENT_REGISTRATION_CLOSED`, `EVENT_FULL`, `VALIDATION_ERROR`, `S3_UPLOAD_FAILED`, `RAZORPAY_ORDER_FAILED`
+
+---
+
+### `POST /api/v1/payments/verify`
+Called by frontend after Razorpay Checkout success. Server-side signature verification.
+
+**Request:**
+```json
+{
+  "registrationId": "8d8c7c3a-...",
+  "razorpayOrderId": "order_xxx",
+  "razorpayPaymentId": "pay_xxx",
+  "razorpaySignature": "abc123..."
+}
+```
+
+**Response 200:**
+```json
+{
+  "success": true,
+  "data": {
+    "registrationNumber": "EVT2026-000042",
+    "eventName": "...",
+    "fullName": "...",
+    "amount": 500.00,
+    "currency": "INR",
+    "status": "PAID"
+  }
+}
+```
+
+**Errors:** `REGISTRATION_NOT_FOUND`, `PAYMENT_ALREADY_PROCESSED`, `PAYMENT_VERIFICATION_FAILED`
+
+---
+
+### `POST /api/v1/payments/webhook`
+Razorpay webhook endpoint. HMAC-verified. Idempotent.
+
+**Headers:** `X-Razorpay-Signature: <hmac>`  
+**Body:** Raw Razorpay webhook JSON payload
+
+**Response 200:** `{ "success": true }`
+
+---
+
+### `GET /api/v1/registrations/{registrationId}`
+Poll registration status.
+
+**Response 200:**
+```json
+{
+  "success": true,
+  "data": {
+    "registrationId": "...",
+    "registrationNumber": "EVT2026-000042",
+    "status": "PAID",
+    "eventName": "...",
+    "fullName": "...",
+    "amount": 500.00
+  }
+}
+```
+
+---
+
+## 5. Registration & Payment Sequence Diagram
+
+```
+User                 Frontend              Backend                  Razorpay           MySQL
+ |                      |                     |                        |                  |
+ |-- Fill form -------> |                     |                        |                  |
+ |-- Submit ----------> |                     |                        |                  |
+ |                      |-- POST /registrations ------------------>    |                  |
+ |                      |                     |-- Validate fields      |                  |
+ |                      |                     |-- Check event open     |                  |
+ |                      |                     |-- Check max slots      |                  |
+ |                      |                     |-- Upload to S3         |                  |
+ |                      |                     |-- INSERT registration (PENDING_PAYMENT) -> |
+ |                      |                     |-- Create Razorpay Order ----------->       |
+ |                      |                     |<--------- order_id ------------------       |
+ |                      |                     |-- INSERT payment (CREATED) ----------->    |
+ |                      |<-- 201 {orderId, keyId, amount} -----                           |
+ |                      |-- Open Razorpay Checkout                                         |
+ |-- Pay ------------>  |                     |                        |                  |
+ |                      |                     |<-------- webhook (payment.captured) ----  |
+ |                      |                     |-- Verify HMAC signature                   |
+ |                      |                     |-- BEGIN TX                                |
+ |                      |                     |-- SELECT reg FOR UPDATE ------------>     |
+ |                      |                     |-- Check not already PAID                  |
+ |                      |                     |-- Verify amount/currency                  |
+ |                      |                     |-- UPDATE payment → CAPTURED               |
+ |                      |                     |-- Generate reg number (atomic)            |
+ |                      |                     |-- UPDATE registration → PAID              |
+ |                      |                     |-- INCREMENT event.registration_count      |
+ |                      |                     |-- COMMIT TX                               |
+ |                      |-- POST /payments/verify (frontend callback) ->                  |
+ |                      |                     |-- Verify signature (same logic)           |
+ |                      |                     |-- If already PAID: idempotent success     |
+ |                      |<-- {registrationNumber, PAID} ----------                        |
+ |<-- Show success ---- |                                                                 |
+```
+
+---
+
+## 6. S3 Strategy
+
+| Concern | Approach |
+|---|---|
+| **Bucket visibility** | Private, block all public access |
+| **Encryption** | SSE-S3 (server-side encryption, default) |
+| **Object key pattern** | `events/{eventCode}/registrations/{registrationUUID}/aadhaar/document.{ext}` |
+| **Upload timing** | On registration creation (before payment) — S3 key stored in registration |
+| **On payment failure** | S3 object kept for configurable grace period (e.g., 7 days), then deleted via S3 lifecycle |
+| **Admin access** | Pre-signed URL with 15-min expiry, only via authorized endpoint |
+| **File validation** | MIME type from Apache Tika (content sniffing, not just extension), size ≤ 5 MB, allowed: `image/jpeg`, `image/png`, `application/pdf` |
+| **Credential management** | AWS IAM Role on EC2/ECS (preferred), fallback to env vars — never in code |
+| **Logging** | Log S3 key only (never document content, never Aadhaar number) |
+
+---
+
+## 7. Security Considerations
+
+| Concern | Mitigation |
+|---|---|
+| Credential leakage | All secrets via env vars / AWS Secrets Manager |
+| Razorpay key on frontend | Only `key_id` (public) exposed; `key_secret` server-side only |
+| Payment trust | Frontend success ignored without server-side HMAC verification |
+| Webhook forgery | HMAC-SHA256 verify against `RAZORPAY_WEBHOOK_SECRET` on raw body |
+| SQL injection | JPA/Hibernate parameterized queries |
+| File upload abuse | Tika MIME sniff + size limit + allowed list |
+| CORS | Explicit allowed origins configured — no wildcard in production |
+| Sensitive data in logs | Custom log filter strips Aadhaar key prefix from logged fields |
+| PII exposure | `registrationNumber` shown; internal UUID not exposed unless needed |
+| Overbooking | Pessimistic lock (`SELECT ... FOR UPDATE`) on event row during payment confirmation |
+| Duplicate registration IDs | Atomic MySQL `AUTO_INCREMENT` sequence via DB function/procedure |
+| Duplicate webhooks | Idempotency check: `razorpayPaymentId` unique constraint; early-return if already CAPTURED |
+| Concurrent payment success | DB `UNIQUE` constraint on `razorpay_payment_id` + `@Transactional` |
+
+---
+
+## 8. Migration Strategy
+
+Adding **Flyway** to replace `ddl-auto=update`.
+
+Scripts:
+- `V1__create_events_table.sql`
+- `V2__create_registrations_table.sql`
+- `V3__create_payments_table.sql`
+- `V4__add_indexes_and_constraints.sql`
+
+> [!WARNING]
+> The existing `events` and `registrations` tables created by `ddl-auto=update` must be **dropped** before running Flyway, since the schema is being restructured. This is acceptable because the current schema has no production data.
+
+---
+
+## 9. Open Questions
+
+> [!IMPORTANT]
+> **Q1 — Registration Number Format**: Should registration numbers be sequential (`EVT2026-000001`) or a shorter alphanumeric code (`EVT26-A7K92P`)? Sequential is simpler and more user-friendly. **Default: sequential.**
+
+> [!IMPORTANT]
+> **Q2 — Aadhaar Upload Timing**: Should Aadhaar be uploaded before payment (current plan) or only after successful payment (via separate step)? Uploading before is simpler UX but stores the document even for failed payments. **Default: upload before payment, delete abandoned files via S3 lifecycle policy.**
+
+> [!IMPORTANT]
+> **Q3 — Authentication for Admin endpoints**: There is currently no auth system. Admin presigned-URL endpoints need protection. Should we add a simple API-key header for now, or defer this? **Default: API-key header for admin endpoints.**
+
+> [!IMPORTANT]
+> **Q4 — Flyway baseline**: The existing DB has tables created by `ddl-auto=update`. These need to be dropped. Please confirm this is acceptable.
+
+> [!IMPORTANT]
+> **Q5 — mssql-jdbc dependency**: The POM includes a SQL Server driver that doesn't match the MySQL datasource. Should we remove it? **Default: remove it.**
+
+---
+
+## 10. Implementation Phases
+
+### Phase 1 — Foundation (Backend)
+1. Update `pom.xml`: add Flyway, AWS SDK v2 S3, Razorpay SDK, Apache Tika, Jakarta Validation, Spring Boot Actuator. Remove mssql-jdbc.
+2. Rewrite `application.properties` to use environment variable placeholders.
+3. Add Flyway migration scripts (V1–V4).
+4. Add `RequestCorrelationFilter` for correlation IDs.
+5. Add `CorsConfig`, `RazorpayConfig`, `S3Config`.
+
+### Phase 2 — Domain Layer
+6. Rewrite `Event.java` (full fields, proper JPA annotations).
+7. Rewrite `Registration.java` (UUID PK, enum status, all fields).
+8. Create `Payment.java`.
+9. Create `RegistrationStatus.java`, `PaymentStatus.java` enums.
+10. Create all DTOs and `ApiResponse<T>` wrapper.
+11. Extend repositories (`EventRepository`, `RegistrationRepository`, `PaymentRepository`).
+
+### Phase 3 — Service Layer
+12. Create `S3Service.java` (upload, delete, presigned URL, MIME validation).
+13. Create `RazorpayService.java` (create order, verify signature, verify webhook HMAC).
+14. Create `EventService.java` (find by eventCode, check open/capacity).
+15. Rewrite `RegistrationService.java` (create registration flow, payment success transaction).
+16. Create `PaymentService.java` (verify payment, handle webhook idempotently).
+
+### Phase 4 — Controller Layer
+17. Rewrite `EventController.java` → `GET /api/v1/events/{eventCode}`.
+18. Rewrite `RegistrationController.java` → `POST /api/v1/events/{eventCode}/registrations`, `GET /api/v1/registrations/{registrationId}`.
+19. Create `PaymentController.java` → `POST /api/v1/payments/verify`, `POST /api/v1/payments/webhook`.
+20. Rewrite `GlobalExceptionHandler.java` with structured `ApiResponse` errors.
+
+### Phase 5 — Frontend
+21. Create `frontend/register.html` (event registration form, Razorpay Checkout integration).
+22. Create `frontend/registration-success.html` (success/status page).
+23. Add "Register" link from `index.html` upcoming events section (minimal change).
+
+### Phase 6 — Testing
+24. Unit tests: `RegistrationServiceTest`, `PaymentServiceTest`, `RazorpayServiceTest`, `S3ServiceTest`.
+25. Integration tests: registration flow, webhook idempotency, concurrent registration.
+
+### Phase 7 — Deployment & Docs
+26. Update `docker-compose.yml` with new env vars.
+27. Create `.env.example`.
+28. Create comprehensive `README.md`.
+
+---
+
+## 11. Files Created / Modified
+
+### MODIFIED
+| File | Change |
+|---|---|
+| [`pom.xml`](file:///d:/Work/GitHub/sindhurunners_web/backend/sindhueventpay/pom.xml) | Add Flyway, AWS SDK v2, Razorpay, Tika, Validation; remove mssql-jdbc |
+| [`application.properties`](file:///d:/Work/GitHub/sindhurunners_web/backend/sindhueventpay/src/main/resources/application.properties) | Rewrite with env var placeholders, add Flyway config |
+| [`models/Event.java`](file:///d:/Work/GitHub/sindhurunners_web/backend/sindhueventpay/src/main/java/com/sindhueventpay/models/Event.java) | Add all required fields |
+| [`models/Registration.java`](file:///d:/Work/GitHub/sindhurunners_web/backend/sindhueventpay/src/main/java/com/sindhueventpay/models/Registration.java) | Rewrite with UUID PK, enum status, full fields |
+| [`Repository/EventRepository.java`](file:///d:/Work/GitHub/sindhurunners_web/backend/sindhueventpay/src/main/java/com/sindhueventpay/Repository/EventRepository.java) | Add `findByEventCode` |
+| [`Repository/RegistrationRepository.java`](file:///d:/Work/GitHub/sindhurunners_web/backend/sindhueventpay/src/main/java/com/sindhueventpay/Repository/RegistrationRepository.java) | Rewrite for UUID, new queries |
+| [`services/RegistrationService.java`](file:///d:/Work/GitHub/sindhurunners_web/backend/sindhueventpay/src/main/java/com/sindhueventpay/services/RegistrationService.java) | Complete rewrite |
+| [`controllers/EventController.java`](file:///d:/Work/GitHub/sindhurunners_web/backend/sindhueventpay/src/main/java/com/sindhueventpay/controllers/EventController.java) | Rewrite for v1 API |
+| [`controllers/RegistrationController.java`](file:///d:/Work/GitHub/sindhurunners_web/backend/sindhueventpay/src/main/java/com/sindhueventpay/controllers/RegistrationController.java) | Rewrite for v1 API |
+| [`exceptions/GlobalExceptionHandler.java`](file:///d:/Work/GitHub/sindhurunners_web/backend/sindhueventpay/src/main/java/com/sindhueventpay/exceptions/GlobalExceptionHandler.java) | Structured error responses |
+| [`deployment/docker-compose.yml`](file:///d:/Work/GitHub\sindhurunners_web/deployment/docker-compose.yml) | Add env vars section |
+| [`frontend/index.html`](file:///d:/Work/GitHub/sindhurunners_web/frontend/index.html) | Add "Register" button link (minimal change) |
+
+### NEW (Backend)
+| File | Purpose |
+|---|---|
+| `models/Payment.java` | Payment entity |
+| `enums/RegistrationStatus.java` | Status enum |
+| `enums/PaymentStatus.java` | Payment status enum |
+| `dto/ApiResponse.java` | Unified response wrapper |
+| `dto/RegistrationRequest.java` | Registration form DTO |
+| `dto/RegistrationResponse.java` | Response after registration created |
+| `dto/PaymentVerifyRequest.java` | Frontend payment verify request |
+| `dto/PaymentWebhookPayload.java` | Razorpay webhook payload |
+| `dto/RegistrationStatusResponse.java` | Status polling response |
+| `dto/EventResponse.java` | Event details for frontend |
+| `config/CorsConfig.java` | CORS configuration |
+| `config/RazorpayConfig.java` | Razorpay bean config |
+| `config/S3Config.java` | AWS S3 client bean |
+| `config/AppProperties.java` | Typed config properties |
+| `services/EventService.java` | Event lookup/validation |
+| `services/PaymentService.java` | Payment verification + webhook |
+| `services/RazorpayService.java` | Razorpay API calls |
+| `services/S3Service.java` | S3 upload/delete/presigned |
+| `controllers/PaymentController.java` | Payment endpoints |
+| `filter/RequestCorrelationFilter.java` | Correlation ID per request |
+| `exceptions/EventFullException.java` | Event capacity exceeded |
+| `exceptions/EventClosedException.java` | Registration not open |
+| `exceptions/DuplicateRegistrationException.java` | Duplicate detection |
+| `exceptions/PaymentVerificationException.java` | Signature mismatch |
+| `exceptions/S3UploadException.java` | S3 failure |
+| `Repository/PaymentRepository.java` | Payment DB access |
+| `db/migration/V1__create_events_table.sql` | Flyway migration |
+| `db/migration/V2__create_registrations_table.sql` | Flyway migration |
+| `db/migration/V3__create_payments_table.sql` | Flyway migration |
+| `db/migration/V4__add_indexes_and_constraints.sql` | Flyway migration |
+| `tests/services/RegistrationServiceTest.java` | Unit tests |
+| `tests/services/PaymentServiceTest.java` | Unit tests |
+| `tests/services/RazorpayServiceTest.java` | Unit tests |
+| `tests/controllers/RegistrationControllerTest.java` | Controller tests |
+| `tests/controllers/PaymentControllerTest.java` | Controller tests |
+
+### NEW (Frontend)
+| File | Purpose |
+|---|---|
+| `frontend/register.html` | Event registration page |
+| `frontend/registration-success.html` | Success / status page |
+
+### NEW (Deployment)
+| File | Purpose |
+|---|---|
+| `deployment/.env.example` | Environment variable template |
+| `README.md` | Complete setup guide |
+
+---
+
+## Verification Plan
+
+### Automated Tests
+```
+cd backend/sindhueventpay
+./mvnw test
+```
+
+### Manual Verification
+1. Start Docker Compose, verify DB migrations run cleanly.
+2. `GET /api/v1/events/{eventCode}` — returns event JSON.
+3. `POST /api/v1/events/{eventCode}/registrations` — creates pending registration, returns Razorpay order.
+4. Complete Razorpay Checkout in test mode.
+5. `POST /api/v1/payments/verify` — returns `registrationNumber`, status `PAID`.
+6. Verify DB: registration row status = PAID, payment row status = CAPTURED, event `registration_count` incremented exactly once.
+7. Replay same webhook — verify idempotent response, no duplicate DB changes.
+8. Submit concurrent registrations — verify no duplicate registration numbers.

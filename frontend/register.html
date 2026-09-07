@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Registration — Sindhu Runners</title>
+    <meta name="description" content="Register for Sindhu Runners events. Secure online registration with Razorpay payment.">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;500;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Razorpay Checkout -->
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+    <style>
+        /* ─── Reset & Base ─────────────────────────────────────────────────── */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --primary:       #1a6fc4;
+            --primary-dark:  #134fa3;
+            --primary-light: #e8f1fc;
+            --accent:        #e67e22;
+            --accent-dark:   #cf6d17;
+            --success:       #27ae60;
+            --danger:        #e74c3c;
+            --warning:       #f39c12;
+            --text:          #1c2333;
+            --text-muted:    #5a6478;
+            --border:        #d4dce8;
+            --bg-grad-start: #b8d9f0;
+            --bg-grad-mid:   #aee6d8;
+            --bg-grad-end:   #add8e6;
+            --card-bg:       rgba(255,255,255,0.92);
+            --card-shadow:   0 8px 40px rgba(26,111,196,0.13), 0 2px 10px rgba(0,0,0,0.07);
+            --radius:        16px;
+            --radius-sm:     8px;
+            --transition:    0.22s ease;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(160deg, var(--bg-grad-start) 0%, var(--bg-grad-mid) 50%, var(--bg-grad-end) 100%);
+            min-height: 100vh;
+            color: var(--text);
+        }
+
+        /* ─── Header ────────────────────────────────────────────────────────── */
+        .site-header {
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        }
+
+        .site-header img { height: 48px; }
+
+        .site-header .title-block { flex: 1; }
+        .site-header .title-block h1 {
+            font-family: 'Roboto Condensed', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+            letter-spacing: 0.5px;
+        }
+        .site-header .title-block p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .back-link {
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: color var(--transition);
+        }
+        .back-link:hover { color: var(--primary-dark); }
+
+        /* ─── Main Layout ───────────────────────────────────────────────────── */
+        .page-wrapper {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 40px 20px 80px;
+        }
+
+        .page-title {
+            font-family: 'Roboto Condensed', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+            text-align: center;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
+
+        .page-subtitle {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 36px;
+        }
+
+        /* ─── Grid layout ───────────────────────────────────────────────────── */
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1.7fr;
+            gap: 28px;
+            align-items: start;
+        }
+        @media (max-width: 700px) { .grid { grid-template-columns: 1fr; } }
+
+        /* ─── Card ──────────────────────────────────────────────────────────── */
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--card-shadow);
+            backdrop-filter: blur(6px);
+            border: 1px solid rgba(255,255,255,0.6);
+            overflow: hidden;
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, var(--primary) 0%, #1a8fc4 100%);
+            padding: 20px 24px;
+        }
+        .card-header h2 {
+            font-family: 'Roboto Condensed', sans-serif;
+            color: #fff;
+            font-size: 1.15rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .card-body { padding: 24px; }
+
+        /* ─── Event Info Card ───────────────────────────────────────────────── */
+        .event-skeleton .skeleton-line {
+            background: linear-gradient(90deg, #e8eef5 25%, #f4f7fa 50%, #e8eef5 75%);
+            background-size: 200%;
+            animation: shimmer 1.4s infinite;
+            border-radius: 6px;
+            margin-bottom: 12px;
+        }
+        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+        .event-name {
+            font-family: 'Roboto Condensed', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+            margin-bottom: 16px;
+            line-height: 1.3;
+        }
+
+        .info-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f4f8;
+        }
+        .info-row:last-child { border-bottom: none; }
+        .info-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+        .info-label { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 2px; }
+        .info-value { font-size: 0.95rem; font-weight: 600; color: var(--text); }
+
+        .fee-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            color: #fff;
+            font-weight: 700;
+            font-size: 1.25rem;
+            border-radius: 50px;
+            padding: 6px 20px;
+            margin: 16px 0 8px;
+            letter-spacing: 0.5px;
+        }
+
+        .slots-bar-wrap { margin-top: 14px; }
+        .slots-label { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 4px; }
+        .slots-bar {
+            height: 6px;
+            background: #e0e8f0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .slots-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #27ae60, #2ecc71);
+            border-radius: 10px;
+            transition: width 0.8s ease;
+        }
+        .slots-count { font-size: 0.78rem; color: var(--text-muted); margin-top: 4px; }
+
+        .badge-closed {
+            display: inline-block;
+            background: var(--danger);
+            color: #fff;
+            border-radius: 50px;
+            padding: 4px 14px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+        .badge-open {
+            display: inline-block;
+            background: var(--success);
+            color: #fff;
+            border-radius: 50px;
+            padding: 4px 14px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        /* ─── Form ──────────────────────────────────────────────────────────── */
+        .form-group { margin-bottom: 20px; }
+
+        .form-label {
+            display: block;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            letter-spacing: 0.4px;
+            text-transform: uppercase;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 11px 14px;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 0.95rem;
+            font-family: 'Inter', sans-serif;
+            color: var(--text);
+            background: #fff;
+            transition: border-color var(--transition), box-shadow var(--transition);
+            outline: none;
+        }
+        .form-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(26,111,196,0.12);
+        }
+        .form-input.error {
+            border-color: var(--danger);
+            box-shadow: 0 0 0 3px rgba(231,76,60,0.10);
+        }
+
+        .form-error {
+            color: var(--danger);
+            font-size: 0.78rem;
+            margin-top: 4px;
+            display: none;
+        }
+        .form-error.visible { display: block; }
+
+        /* ─── File upload ───────────────────────────────────────────────────── */
+        .file-upload-zone {
+            border: 2px dashed var(--border);
+            border-radius: var(--radius-sm);
+            padding: 24px;
+            text-align: center;
+            cursor: pointer;
+            transition: all var(--transition);
+            background: #f8fbff;
+            position: relative;
+        }
+        .file-upload-zone:hover, .file-upload-zone.drag-over {
+            border-color: var(--primary);
+            background: var(--primary-light);
+        }
+        .file-upload-zone input[type="file"] {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+        .upload-icon { font-size: 2.2rem; margin-bottom: 8px; }
+        .upload-text { font-size: 0.88rem; color: var(--text-muted); }
+        .upload-text strong { color: var(--primary); }
+        .upload-hint { font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; }
+
+        .file-preview {
+            display: none;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            background: #f0f9f4;
+            border: 1px solid #b2dfcc;
+            border-radius: var(--radius-sm);
+            margin-top: 8px;
+        }
+        .file-preview.visible { display: flex; }
+        .file-preview-icon { font-size: 1.6rem; }
+        .file-preview-name { font-size: 0.85rem; font-weight: 500; color: var(--text); flex: 1; word-break: break-all; }
+        .file-preview-size { font-size: 0.75rem; color: var(--text-muted); }
+        .file-remove {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: var(--danger);
+            padding: 4px;
+            line-height: 1;
+        }
+
+        /* ─── Consent ───────────────────────────────────────────────────────── */
+        .consent-box {
+            background: #fff8e8;
+            border: 1px solid #f0d080;
+            border-radius: var(--radius-sm);
+            padding: 14px 16px;
+            margin-bottom: 20px;
+        }
+        .consent-box p {
+            font-size: 0.82rem;
+            color: #7a5c00;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+        .consent-check {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+        .consent-check input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--primary);
+            cursor: pointer;
+        }
+        .consent-check span { font-size: 0.83rem; color: var(--text); }
+
+        /* ─── Submit button ─────────────────────────────────────────────────── */
+        .btn-register {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, var(--primary) 0%, #1a8fc4 100%);
+            color: #fff;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 1.05rem;
+            font-family: 'Roboto Condensed', sans-serif;
+            font-weight: 700;
+            letter-spacing: 0.8px;
+            cursor: pointer;
+            transition: all var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-register:hover:not(:disabled) {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(26,111,196,0.35);
+        }
+        .btn-register:active { transform: translateY(0); }
+        .btn-register:disabled {
+            background: #9fb8d5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .btn-register .btn-text { display: inline-block; }
+        .btn-register .btn-spinner { display: none; }
+        .btn-register.loading .btn-text { display: none; }
+        .btn-register.loading .btn-spinner { display: inline-block; }
+
+        /* ─── Global alert ──────────────────────────────────────────────────── */
+        .alert {
+            padding: 14px 18px;
+            border-radius: var(--radius-sm);
+            font-size: 0.88rem;
+            margin-bottom: 20px;
+            display: none;
+            line-height: 1.5;
+        }
+        .alert.visible { display: block; }
+        .alert-error { background: #fdf0ee; border: 1px solid #f5c6c0; color: #922b21; }
+        .alert-info  { background: #eaf4ff; border: 1px solid #b3d4f5; color: #1a4a8a; }
+
+        /* ─── Security note ─────────────────────────────────────────────────── */
+        .security-note {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-top: 14px;
+            text-align: center;
+            justify-content: center;
+        }
+
+        /* ─── Step indicators ───────────────────────────────────────────────── */
+        .steps {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0;
+            margin-bottom: 32px;
+        }
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+        .step-circle {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: var(--border);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.85rem;
+            transition: background var(--transition);
+            z-index: 1;
+        }
+        .step.active .step-circle { background: var(--primary); }
+        .step.done .step-circle { background: var(--success); }
+        .step-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+            white-space: nowrap;
+        }
+        .step.active .step-label { color: var(--primary); font-weight: 600; }
+        .step-line {
+            flex: 1;
+            height: 2px;
+            background: var(--border);
+            min-width: 40px;
+            margin-bottom: 18px;
+        }
+        .step-line.done { background: var(--success); }
+
+        /* ─── Processing overlay ─────────────────────────────────────────────── */
+        .processing-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(26, 40, 70, 0.6);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+        }
+        .processing-overlay.visible { display: flex; }
+        .processing-card {
+            background: #fff;
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            max-width: 340px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+        }
+        .spinner {
+            width: 52px;
+            height: 52px;
+            border: 4px solid #e8f1fc;
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 20px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .processing-title {
+            font-family: 'Roboto Condensed', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 8px;
+        }
+        .processing-sub { font-size: 0.85rem; color: var(--text-muted); }
+
+        /* ─── Responsive ─────────────────────────────────────────────────────── */
+        @media (max-width: 480px) {
+            .page-title { font-size: 1.5rem; }
+            .card-body { padding: 18px; }
+            .steps { gap: 0; }
+            .step-line { min-width: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Site Header -->
+<header class="site-header">
+    <a href="index.html">
+        <img src="images/SindhuRunnerLogo02-04.png" alt="Sindhu Runners Logo">
+    </a>
+    <div class="title-block">
+        <h1>Sindhu Runners</h1>
+        <p>Event Registration Portal</p>
+    </div>
+    <a href="index.html" class="back-link">← Back to Home</a>
+</header>
+
+<!-- Processing Overlay -->
+<div class="processing-overlay" id="processingOverlay" role="status" aria-live="polite">
+    <div class="processing-card">
+        <div class="spinner" aria-hidden="true"></div>
+        <div class="processing-title" id="processingTitle">Processing Payment…</div>
+        <div class="processing-sub" id="processingSub">Please do not close this window.</div>
+    </div>
+</div>
+
+<!-- Main Content -->
+<main class="page-wrapper">
+    <h1 class="page-title" id="pageTitle">Event Registration</h1>
+    <p class="page-subtitle">Complete the form below to register for the event.</p>
+
+    <!-- Step indicators -->
+    <div class="steps" role="list">
+        <div class="step active" id="step1" role="listitem">
+            <div class="step-circle">1</div>
+            <div class="step-label">Details</div>
+        </div>
+        <div class="step-line" id="line1"></div>
+        <div class="step" id="step2" role="listitem">
+            <div class="step-circle">2</div>
+            <div class="step-label">Payment</div>
+        </div>
+        <div class="step-line" id="line2"></div>
+        <div class="step" id="step3" role="listitem">
+            <div class="step-circle">3</div>
+            <div class="step-label">Confirmed</div>
+        </div>
+    </div>
+
+    <div class="grid">
+
+        <!-- Left: Event Info Card -->
+        <aside>
+            <div class="card" id="eventCard">
+                <div class="card-header">
+                    <h2>📋 Event Details</h2>
+                </div>
+                <div class="card-body">
+                    <!-- Skeleton loading state -->
+                    <div class="event-skeleton" id="eventSkeleton">
+                        <div class="skeleton-line" style="height:18px;width:80%"></div>
+                        <div class="skeleton-line" style="height:14px;width:60%"></div>
+                        <div class="skeleton-line" style="height:14px;width:70%"></div>
+                        <div class="skeleton-line" style="height:14px;width:50%"></div>
+                        <div class="skeleton-line" style="height:14px;width:65%"></div>
+                    </div>
+                    <!-- Loaded event info -->
+                    <div id="eventInfo" style="display:none">
+                        <div class="event-name" id="eventNameDisplay"></div>
+                        <div class="info-row">
+                            <span class="info-icon">📅</span>
+                            <div>
+                                <div class="info-label">Event Date</div>
+                                <div class="info-value" id="eventDateDisplay">—</div>
+                            </div>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-icon">💰</span>
+                            <div>
+                                <div class="info-label">Registration Fee</div>
+                                <div class="info-value">
+                                    <span class="fee-badge" id="eventFeeDisplay">—</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-icon">🎯</span>
+                            <div>
+                                <div class="info-label">Availability</div>
+                                <div id="eventSlotsDisplay">
+                                    <div class="slots-bar-wrap">
+                                        <div class="slots-bar">
+                                            <div class="slots-fill" id="slotsFill" style="width:0%"></div>
+                                        </div>
+                                        <div class="slots-count" id="slotsCount"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <span class="badge-open" id="statusBadge">✓ Registration Open</span>
+                        </div>
+                    </div>
+                    <!-- Error loading event -->
+                    <div id="eventLoadError" style="display:none;color:#e74c3c;font-size:0.88rem;padding:8px 0;">
+                        ⚠️ Could not load event details. Please check the URL or try again.
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Right: Registration Form -->
+        <section>
+            <div class="card">
+                <div class="card-header">
+                    <h2>📝 Your Details</h2>
+                </div>
+                <div class="card-body">
+
+                    <!-- Global error/info alert -->
+                    <div class="alert alert-error" id="globalAlert" role="alert"></div>
+
+                    <form id="registrationForm" novalidate>
+
+                        <!-- Full Name -->
+                        <div class="form-group">
+                            <label class="form-label" for="fullName">Full Name *</label>
+                            <input
+                                class="form-input"
+                                type="text"
+                                id="fullName"
+                                name="fullName"
+                                placeholder="e.g. Prasad Korgaonkar"
+                                autocomplete="name"
+                                maxlength="100"
+                                required>
+                            <div class="form-error" id="fullNameError">Please enter your full name (2–100 characters).</div>
+                        </div>
+
+                        <!-- Email -->
+                        <div class="form-group">
+                            <label class="form-label" for="email">Email Address *</label>
+                            <input
+                                class="form-input"
+                                type="email"
+                                id="email"
+                                name="email"
+                                placeholder="e.g. prasad@example.com"
+                                autocomplete="email"
+                                maxlength="150"
+                                required>
+                            <div class="form-error" id="emailError">Please enter a valid email address.</div>
+                        </div>
+
+                        <!-- Mobile Number -->
+                        <div class="form-group">
+                            <label class="form-label" for="mobileNumber">Mobile Number *</label>
+                            <input
+                                class="form-input"
+                                type="tel"
+                                id="mobileNumber"
+                                name="mobileNumber"
+                                placeholder="10-digit mobile number"
+                                autocomplete="tel"
+                                maxlength="10"
+                                pattern="[6-9]\d{9}"
+                                required>
+                            <div class="form-error" id="mobileError">Please enter a valid 10-digit Indian mobile number (starting with 6–9).</div>
+                        </div>
+
+                        <!-- Aadhaar Upload -->
+                        <div class="form-group">
+                            <label class="form-label">Aadhaar Card Document *</label>
+                            <div class="file-upload-zone" id="uploadZone">
+                                <input
+                                    type="file"
+                                    id="aadhaarDocument"
+                                    name="aadhaarDocument"
+                                    accept=".jpg,.jpeg,.png,.pdf"
+                                    aria-label="Upload Aadhaar document">
+                                <div class="upload-icon">📄</div>
+                                <div class="upload-text">
+                                    <strong>Click to upload</strong> or drag &amp; drop
+                                </div>
+                                <div class="upload-hint">JPG, PNG or PDF · Max 5 MB</div>
+                            </div>
+                            <div class="file-preview" id="filePreview">
+                                <span class="file-preview-icon" id="filePreviewIcon">📄</span>
+                                <div>
+                                    <div class="file-preview-name" id="filePreviewName"></div>
+                                    <div class="file-preview-size" id="filePreviewSize"></div>
+                                </div>
+                                <button type="button" class="file-remove" id="fileRemove" aria-label="Remove file">✕</button>
+                            </div>
+                            <div class="form-error" id="aadhaarError">Please upload your Aadhaar card (JPG, PNG or PDF, max 5 MB).</div>
+                        </div>
+
+                        <!-- Consent -->
+                        <div class="consent-box">
+                            <p>
+                                🔒 Your Aadhaar document will be stored securely and used only for identity
+                                verification. We comply with all applicable data protection regulations.
+                                By proceeding, you consent to the collection and secure storage of your
+                                identity document.
+                            </p>
+                            <label class="consent-check">
+                                <input type="checkbox" id="consentCheck" required>
+                                <span>I consent to the above and confirm the details provided are accurate.</span>
+                            </label>
+                            <div class="form-error" id="consentError">You must provide consent to register.</div>
+                        </div>
+
+                        <!-- Submit -->
+                        <button type="submit" class="btn-register" id="registerBtn" disabled>
+                            <span class="btn-text">🚀 Register &amp; Pay</span>
+                            <span class="btn-spinner">⏳ Processing…</span>
+                        </button>
+
+                        <div class="security-note">
+                            🔐 Payments secured by Razorpay · 256-bit SSL encryption
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </section>
+    </div>
+</main>
+
+<script>
+    // ─── Configuration ──────────────────────────────────────────────────────
+    const API_BASE = '/api/v1';
+
+    // ─── Utilities ──────────────────────────────────────────────────────────
+    const $ = id => document.getElementById(id);
+
+    function getEventCode() {
+        const params = new URLSearchParams(window.location.search);
+        return params.get('event') || '';
+    }
+
+    function formatCurrency(amount, currency = 'INR') {
+        return new Intl.NumberFormat('en-IN', {
+            style: 'currency', currency, minimumFractionDigits: 0
+        }).format(amount);
+    }
+
+    function formatDate(dateStr) {
+        if (!dateStr) return '—';
+        return new Date(dateStr).toLocaleDateString('en-IN', {
+            day: 'numeric', month: 'long', year: 'numeric'
+        });
+    }
+
+    function formatBytes(bytes) {
+        if (bytes < 1024) return bytes + ' B';
+        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+        return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+    }
+
+    function showAlert(msg) {
+        const el = $('globalAlert');
+        el.textContent = msg;
+        el.classList.add('visible');
+        el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function hideAlert() {
+        $('globalAlert').classList.remove('visible');
+    }
+
+    function showOverlay(title = 'Processing…', sub = 'Please do not close this window.') {
+        $('processingTitle').textContent = title;
+        $('processingSub').textContent = sub;
+        $('processingOverlay').classList.add('visible');
+    }
+
+    function hideOverlay() {
+        $('processingOverlay').classList.remove('visible');
+    }
+
+    function setStep(n) {
+        [1, 2, 3].forEach(i => {
+            const s = $(`step${i}`);
+            s.classList.remove('active', 'done');
+            if (i < n) s.classList.add('done');
+            else if (i === n) s.classList.add('active');
+        });
+        [1, 2].forEach(i => {
+            const l = $(`line${i}`);
+            l.classList.toggle('done', i < n);
+        });
+    }
+
+    // ─── Step 1: Load Event ──────────────────────────────────────────────────
+    const eventCode = getEventCode();
+    let eventData = null;
+
+    async function loadEvent() {
+        if (!eventCode) {
+            $('eventSkeleton').style.display = 'none';
+            $('eventLoadError').style.display = 'block';
+            $('registerBtn').disabled = true;
+            return;
+        }
+
+        try {
+            const res = await fetch(`${API_BASE}/events/${encodeURIComponent(eventCode)}`);
+            const json = await res.json();
+
+            $('eventSkeleton').style.display = 'none';
+
+            if (!res.ok || !json.success) {
+                $('eventLoadError').textContent = json.message || 'Event not found.';
+                $('eventLoadError').style.display = 'block';
+                return;
+            }
+
+            eventData = json.data;
+
+            // Populate event info
+            $('pageTitle').textContent = 'Register — ' + eventData.eventName;
+            document.title = 'Register — ' + eventData.eventName + ' | Sindhu Runners';
+            $('eventNameDisplay').textContent = eventData.eventName;
+
+            const startDate = formatDate(eventData.startDate);
+            const endDate   = eventData.endDate && eventData.endDate !== eventData.startDate
+                              ? ' – ' + formatDate(eventData.endDate) : '';
+            $('eventDateDisplay').textContent = startDate + endDate;
+
+            $('eventFeeDisplay').textContent = formatCurrency(eventData.registrationFee, eventData.currency);
+
+            const maxSlots  = eventData.availableSlots + (eventData.maxRegistrations || eventData.availableSlots);
+            const pctFull   = maxSlots > 0
+                ? Math.round(((maxSlots - eventData.availableSlots) / maxSlots) * 100) : 0;
+            $('slotsFill').style.width = pctFull + '%';
+            $('slotsFill').style.background = pctFull > 80
+                ? 'linear-gradient(90deg,#e74c3c,#e67e22)'
+                : 'linear-gradient(90deg,#27ae60,#2ecc71)';
+            $('slotsCount').textContent = eventData.availableSlots + ' slots remaining';
+
+            const open = eventData.registrationOpen && eventData.availableSlots > 0;
+            $('statusBadge').textContent = open ? '✓ Registration Open' : '✗ Registration Closed';
+            $('statusBadge').className = open ? 'badge-open' : 'badge-closed';
+
+            $('eventInfo').style.display = 'block';
+
+            if (!open) {
+                showAlert('Registration for this event is currently closed or full.');
+                $('registerBtn').disabled = true;
+            }
+
+        } catch (err) {
+            $('eventSkeleton').style.display = 'none';
+            $('eventLoadError').textContent = 'Network error. Please refresh the page.';
+            $('eventLoadError').style.display = 'block';
+        }
+    }
+
+    loadEvent();
+
+    // ─── File Upload Handling ───────────────────────────────────────────────
+    const uploadZone  = $('uploadZone');
+    const fileInput   = $('aadhaarDocument');
+    const filePreview = $('filePreview');
+    const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'application/pdf'];
+    const MAX_SIZE = 5 * 1024 * 1024; // 5 MB
+
+    function handleFile(file) {
+        clearFieldError('aadhaarError', fileInput);
+
+        if (!ALLOWED_TYPES.includes(file.type)) {
+            showFieldError('aadhaarError', fileInput, 'File type not allowed. Use JPG, PNG or PDF.');
+            fileInput.value = '';
+            return;
+        }
+        if (file.size > MAX_SIZE) {
+            showFieldError('aadhaarError', fileInput, 'File is too large. Maximum size is 5 MB.');
+            fileInput.value = '';
+            return;
+        }
+
+        const icons = { 'application/pdf': '📋', 'image/jpeg': '🖼️', 'image/png': '🖼️' };
+        $('filePreviewIcon').textContent = icons[file.type] || '📄';
+        $('filePreviewName').textContent = file.name;
+        $('filePreviewSize').textContent = formatBytes(file.size);
+        filePreview.classList.add('visible');
+        uploadZone.style.display = 'none';
+    }
+
+    fileInput.addEventListener('change', e => {
+        if (e.target.files.length) handleFile(e.target.files[0]);
+    });
+
+    $('fileRemove').addEventListener('click', () => {
+        fileInput.value = '';
+        filePreview.classList.remove('visible');
+        uploadZone.style.display = 'block';
+    });
+
+    uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('drag-over'); });
+    uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag-over'));
+    uploadZone.addEventListener('drop', e => {
+        e.preventDefault();
+        uploadZone.classList.remove('drag-over');
+        const file = e.dataTransfer.files[0];
+        if (file) {
+            const dt = new DataTransfer();
+            dt.items.add(file);
+            fileInput.files = dt.files;
+            handleFile(file);
+        }
+    });
+
+    // ─── Form validation helpers ─────────────────────────────────────────────
+    function showFieldError(errorId, inputEl, msg) {
+        const errEl = $(errorId);
+        if (msg) errEl.textContent = msg;
+        errEl.classList.add('visible');
+        inputEl.classList.add('error');
+    }
+
+    function clearFieldError(errorId, inputEl) {
+        $(errorId).classList.remove('visible');
+        if (inputEl) inputEl.classList.remove('error');
+    }
+
+    function validateForm() {
+        let valid = true;
+
+        const name = $('fullName').value.trim();
+        if (!name || name.length < 2) {
+            showFieldError('fullNameError', $('fullName'));
+            valid = false;
+        } else clearFieldError('fullNameError', $('fullName'));
+
+        const email = $('email').value.trim();
+        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            showFieldError('emailError', $('email'));
+            valid = false;
+        } else clearFieldError('emailError', $('email'));
+
+        const mobile = $('mobileNumber').value.trim();
+        if (!mobile || !/^[6-9]\d{9}$/.test(mobile)) {
+            showFieldError('mobileError', $('mobileNumber'));
+            valid = false;
+        } else clearFieldError('mobileError', $('mobileNumber'));
+
+        if (!fileInput.files.length) {
+            showFieldError('aadhaarError', fileInput, 'Please upload your Aadhaar document.');
+            valid = false;
+        } else clearFieldError('aadhaarError', fileInput);
+
+        if (!$('consentCheck').checked) {
+            $('consentError').classList.add('visible');
+            valid = false;
+        } else $('consentError').classList.remove('visible');
+
+        return valid;
+    }
+
+    // Enable button only when consent is checked
+    $('consentCheck').addEventListener('change', () => {
+        $('registerBtn').disabled = !$('consentCheck').checked;
+    });
+
+    // ─── Form Submission ─────────────────────────────────────────────────────
+    $('registrationForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        hideAlert();
+
+        if (!validateForm()) return;
+        if (!eventData || !eventData.registrationOpen) {
+            showAlert('Registration is not available for this event.');
+            return;
+        }
+
+        // Disable button to prevent double-submission
+        const btn = $('registerBtn');
+        btn.disabled = true;
+        btn.classList.add('loading');
+
+        showOverlay('Uploading document…', 'Securely uploading your Aadhaar document.');
+        setStep(2);
+
+        try {
+            // Build multipart form
+            const formData = new FormData();
+            formData.append('fullName',      $('fullName').value.trim());
+            formData.append('email',         $('email').value.trim().toLowerCase());
+            formData.append('mobileNumber',  $('mobileNumber').value.trim());
+            formData.append('aadhaarDocument', fileInput.files[0]);
+
+            // Step 1: Create registration + Razorpay order
+            const regRes = await fetch(
+                `${API_BASE}/events/${encodeURIComponent(eventCode)}/registrations`,
+                { method: 'POST', body: formData }
+            );
+            const regJson = await regRes.json();
+
+            if (!regRes.ok || !regJson.success) {
+                throw new Error(regJson.message || 'Registration failed. Please try again.');
+            }
+
+            const regData = regJson.data;
+            hideOverlay();
+
+            // Step 2: Open Razorpay Checkout
+            const options = {
+                key:         regData.razorpayKeyId,
+                amount:      regData.amountInPaise,
+                currency:    regData.currency,
+                name:        'Sindhu Runners',
+                description: regData.description,
+                order_id:    regData.razorpayOrderId,
+                image:       'images/SindhuRunnerLogo02-04.png',
+
+                prefill: {
+                    name:    regData.fullName,
+                    email:   regData.email,
+                    contact: $('mobileNumber').value.trim()
+                },
+
+                theme: { color: '#1a6fc4' },
+
+                modal: {
+                    ondismiss: function () {
+                        // User closed checkout — allow re-try
+                        btn.disabled = false;
+                        btn.classList.remove('loading');
+                        setStep(1);
+                        showAlert('Payment was cancelled. You can try again.');
+                    }
+                },
+
+                handler: async function (response) {
+                    // Payment completed in Razorpay — verify server-side
+                    showOverlay('Verifying payment…', 'Please wait while we confirm your payment.');
+                    setStep(3);
+
+                    try {
+                        const verifyRes = await fetch(`${API_BASE}/payments/verify`, {
+                            method:  'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                registrationId:    regData.registrationId,
+                                razorpayOrderId:   response.razorpay_order_id,
+                                razorpayPaymentId: response.razorpay_payment_id,
+                                razorpaySignature: response.razorpay_signature
+                            })
+                        });
+                        const verifyJson = await verifyRes.json();
+
+                        if (!verifyRes.ok || !verifyJson.success) {
+                            throw new Error(verifyJson.message || 'Payment verification failed.');
+                        }
+
+                        // Redirect to success page
+                        const d = verifyJson.data;
+                        const params = new URLSearchParams({
+                            regId:  d.registrationId,
+                            regNum: d.registrationNumber || '',
+                            event:  d.eventName,
+                            name:   d.fullName,
+                            amount: d.amount,
+                            status: d.status
+                        });
+                        hideOverlay();
+                        window.location.href = 'registration-success.html?' + params.toString();
+
+                    } catch (err) {
+                        hideOverlay();
+                        showAlert(
+                            '⚠️ ' + (err.message || 'Verification error.') +
+                            ' Your payment may have been received. Please contact support with your order ID: ' +
+                            regData.razorpayOrderId
+                        );
+                        btn.disabled = false;
+                        btn.classList.remove('loading');
+                        setStep(1);
+                    }
+                }
+            };
+
+            const rzp = new Razorpay(options);
+            rzp.on('payment.failed', function (response) {
+                hideOverlay();
+                showAlert('Payment failed: ' + (response.error.description || 'Please try again.'));
+                btn.disabled = false;
+                btn.classList.remove('loading');
+                setStep(1);
+            });
+            rzp.open();
+
+        } catch (err) {
+            hideOverlay();
+            showAlert('⚠️ ' + (err.message || 'An unexpected error occurred. Please try again.'));
+            btn.disabled = false;
+            btn.classList.remove('loading');
+            setStep(1);
+        }
+    });
+</script>
+</body>
+</html>
