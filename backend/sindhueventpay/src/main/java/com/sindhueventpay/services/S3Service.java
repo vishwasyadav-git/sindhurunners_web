@@ -67,12 +67,13 @@ public class S3Service {
      */
     public String uploadAadhaarDocument(MultipartFile file,
                                         String eventCode,
-                                        String registrationId) {
+                                        String mobileNumber,
+                                        String fullName) {
         validateFile(file);
 
         String mimeType = detectMimeType(file);
         String extension = extensionForMime(mimeType);
-        String objectKey = buildObjectKey(eventCode, registrationId, extension);
+        String objectKey = buildObjectKey(eventCode, mobileNumber, fullName, extension);
 
         try {
             byte[] bytes = file.getBytes();
@@ -200,8 +201,9 @@ public class S3Service {
      * <p>Pattern: {@code events/{eventCode}/registrations/{uuid}/aadhaar/document.{ext}}
      * <p>No user name, email, or Aadhaar number ever appears in the key.
      */
-    private String buildObjectKey(String eventCode, String registrationId, String extension) {
-        return String.format("events/%s/registrations/%s/aadhaar/document.%s",
-                eventCode, registrationId, extension);
+    private String buildObjectKey(String eventCode, String mobileNumber, String fullName, String extension) {
+        String cleanedName = fullName.replaceAll("[^a-zA-Z0-9_-]", "").toLowerCase();
+        return String.format("events/%s/registrations/%s_%s/aadhaar/document.%s",
+                eventCode, mobileNumber, cleanedName, extension);
     }
 }

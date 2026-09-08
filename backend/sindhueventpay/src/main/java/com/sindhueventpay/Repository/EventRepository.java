@@ -22,8 +22,8 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     /** Find event by its short human-readable code (e.g. {@code EVT2026}). */
     Optional<Event> findByEventCode(String eventCode);
 
-    /** Find all events that are currently open for registration. */
-    java.util.List<Event> findByRegistrationOpenTrue();
+    /** Find all events that are currently active. */
+    java.util.List<Event> findByIsActiveTrue();
 
     /**
      * Find event by code with a pessimistic write lock (SELECT … FOR UPDATE).

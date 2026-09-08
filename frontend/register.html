@@ -195,15 +195,6 @@
         .card-body { padding: 24px; }
 
         /* ─── Event Info Card ───────────────────────────────────────────────── */
-        .event-skeleton .skeleton-line {
-            background: linear-gradient(90deg, #e8eef5 25%, #f4f7fa 50%, #e8eef5 75%);
-            background-size: 200%;
-            animation: shimmer 1.4s infinite;
-            border-radius: 6px;
-            margin-bottom: 12px;
-        }
-        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-
         .event-name {
             font-family: 'Roboto Condensed', sans-serif;
             font-size: 1.3rem;
@@ -237,22 +228,6 @@
             letter-spacing: 0.5px;
         }
 
-        .slots-bar-wrap { margin-top: 14px; }
-        .slots-label { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 4px; }
-        .slots-bar {
-            height: 6px;
-            background: #e0e8f0;
-            border-radius: 10px;
-            overflow: hidden;
-        }
-        .slots-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #27ae60, #2ecc71);
-            border-radius: 10px;
-            transition: width 0.8s ease;
-        }
-        .slots-count { font-size: 0.78rem; color: var(--text-muted); margin-top: 4px; }
-
         .badge-closed {
             display: inline-block;
             background: var(--danger);
@@ -274,8 +249,25 @@
             margin-top: 10px;
         }
 
+        /* ─── Registration Summary Card ─────────────────────────────────────── */
+        .summary-card {
+            background: #f8fbff;
+            border: 2px solid var(--primary-light);
+            border-radius: var(--radius-sm);
+            padding: 16px;
+            margin-top: 20px;
+            display: none;
+        }
+        .summary-card.visible { display: block; }
+        .summary-title { font-weight: 600; color: var(--primary-dark); margin-bottom: 10px; }
+        .summary-row { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 0.9rem; }
+        .summary-label { color: var(--text-muted); }
+        .summary-val { font-weight: 600; color: var(--text); }
+
         /* ─── Form ──────────────────────────────────────────────────────────── */
         .form-group { margin-bottom: 20px; }
+        .form-row { display: flex; gap: 20px; }
+        .form-row .form-group { flex: 1; }
 
         .form-label {
             display: block;
@@ -382,17 +374,19 @@
         }
         .consent-check {
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             gap: 8px;
             cursor: pointer;
+            margin-bottom: 8px;
         }
         .consent-check input[type="checkbox"] {
             width: 16px;
             height: 16px;
             accent-color: var(--primary);
             cursor: pointer;
+            margin-top: 2px;
         }
-        .consent-check span { font-size: 0.83rem; color: var(--text); }
+        .consent-check span { font-size: 0.83rem; color: var(--text); flex: 1; }
 
         /* ─── Submit button ─────────────────────────────────────────────────── */
         .btn-register {
@@ -453,52 +447,6 @@
             justify-content: center;
         }
 
-        /* ─── Step indicators ───────────────────────────────────────────────── */
-        .steps {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 0;
-            margin-bottom: 32px;
-        }
-        .step {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            position: relative;
-        }
-        .step-circle {
-            width: 34px;
-            height: 34px;
-            border-radius: 50%;
-            background: var(--border);
-            color: #fff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 0.85rem;
-            transition: background var(--transition);
-            z-index: 1;
-        }
-        .step.active .step-circle { background: var(--primary); }
-        .step.done .step-circle { background: var(--success); }
-        .step-label {
-            font-size: 0.7rem;
-            color: var(--text-muted);
-            margin-top: 4px;
-            white-space: nowrap;
-        }
-        .step.active .step-label { color: var(--primary); font-weight: 600; }
-        .step-line {
-            flex: 1;
-            height: 2px;
-            background: var(--border);
-            min-width: 40px;
-            margin-bottom: 18px;
-        }
-        .step-line.done { background: var(--success); }
-
         /* ─── Processing overlay ─────────────────────────────────────────────── */
         .processing-overlay {
             display: none;
@@ -542,14 +490,12 @@
         @media (max-width: 480px) {
             .page-title { font-size: 1.5rem; }
             .card-body { padding: 18px; }
-            .steps { gap: 0; }
-            .step-line { min-width: 20px; }
+            .form-row { flex-direction: column; gap: 0; }
         }
     </style>
 </head>
 <body>
 
-<!-- Site Header -->
 <header class="site-header">
     <a href="index.html">
         <img src="images/SindhuRunnerLogo02-04.png" alt="Sindhu Runners Logo">
@@ -561,7 +507,6 @@
     <a href="index.html" class="back-link">← Back to Home</a>
 </header>
 
-<!-- Processing Overlay -->
 <div class="processing-overlay" id="processingOverlay" role="status" aria-live="polite">
     <div class="processing-card">
         <div class="spinner" aria-hidden="true"></div>
@@ -570,239 +515,251 @@
     </div>
 </div>
 
-<!-- Main Content -->
 <main class="page-wrapper">
     <h1 class="page-title" id="pageTitle">Event Registration</h1>
     <p class="page-subtitle">Complete the form below to register for the event.</p>
 
     <!-- Event Selection Flow -->
     <div id="eventSelectionFlow" style="display: none;">
-        <div id="catalogSkeleton" class="event-catalog">
-            <div class="event-card event-skeleton">
-                <div class="skeleton-line" style="height:24px; width:80%;"></div>
-                <div class="skeleton-line" style="height:14px; width:60%;"></div>
-                <div class="skeleton-line" style="height:14px; width:50%;"></div>
-                <div class="skeleton-line" style="height:20px; width:40%; margin-top:16px;"></div>
-            </div>
-            <div class="event-card event-skeleton">
-                <div class="skeleton-line" style="height:24px; width:80%;"></div>
-                <div class="skeleton-line" style="height:14px; width:60%;"></div>
-                <div class="skeleton-line" style="height:14px; width:50%;"></div>
-                <div class="skeleton-line" style="height:20px; width:40%; margin-top:16px;"></div>
-            </div>
-        </div>
         <div id="catalogError" class="alert alert-error" style="display: none; margin-top: 20px;"></div>
         <div id="catalogGrid" class="event-catalog"></div>
     </div>
 
     <!-- Registration Flow -->
     <div id="registrationFlow" style="display: none;">
-        <!-- Step indicators -->
-        <div class="steps" role="list">
-        <div class="step active" id="step1" role="listitem">
-            <div class="step-circle">1</div>
-            <div class="step-label">Details</div>
-        </div>
-        <div class="step-line" id="line1"></div>
-        <div class="step" id="step2" role="listitem">
-            <div class="step-circle">2</div>
-            <div class="step-label">Payment</div>
-        </div>
-        <div class="step-line" id="line2"></div>
-        <div class="step" id="step3" role="listitem">
-            <div class="step-circle">3</div>
-            <div class="step-label">Confirmed</div>
-        </div>
-    </div>
-
-    <div class="grid">
-
-        <!-- Left: Event Info Card -->
-        <aside>
-            <div class="card" id="eventCard">
-                <div class="card-header">
-                    <h2>📋 Event Details</h2>
-                </div>
-                <div class="card-body">
-                    <!-- Skeleton loading state -->
-                    <div class="event-skeleton" id="eventSkeleton">
-                        <div class="skeleton-line" style="height:18px;width:80%"></div>
-                        <div class="skeleton-line" style="height:14px;width:60%"></div>
-                        <div class="skeleton-line" style="height:14px;width:70%"></div>
-                        <div class="skeleton-line" style="height:14px;width:50%"></div>
-                        <div class="skeleton-line" style="height:14px;width:65%"></div>
+        <div class="grid">
+            <aside>
+                <div class="card" id="eventCard">
+                    <div class="card-header">
+                        <h2>📋 Event Details</h2>
                     </div>
-                    <!-- Loaded event info -->
-                    <div id="eventInfo" style="display:none">
-                        <div class="event-name" id="eventNameDisplay"></div>
-                        <div class="info-row">
-                            <span class="info-icon">📅</span>
-                            <div>
-                                <div class="info-label">Event Date</div>
-                                <div class="info-value" id="eventDateDisplay">—</div>
-                            </div>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-icon">💰</span>
-                            <div>
-                                <div class="info-label">Registration Fee</div>
-                                <div class="info-value">
-                                    <span class="fee-badge" id="eventFeeDisplay">—</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="info-row">
-                            <span class="info-icon">🎯</span>
-                            <div>
-                                <div class="info-label">Availability</div>
-                                <div id="eventSlotsDisplay">
-                                    <div class="slots-bar-wrap">
-                                        <div class="slots-bar">
-                                            <div class="slots-fill" id="slotsFill" style="width:0%"></div>
-                                        </div>
-                                        <div class="slots-count" id="slotsCount"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div>
-                            <span class="badge-open" id="statusBadge">✓ Registration Open</span>
-                        </div>
-                    </div>
-                    <!-- Error loading event -->
-                    <div id="eventLoadError" style="display:none;color:#e74c3c;font-size:0.88rem;padding:8px 0;">
-                        ⚠️ Could not load event details. Please check the URL or try again.
-                    </div>
-                </div>
-            </div>
-        </aside>
-
-        <!-- Right: Registration Form -->
-        <section>
-            <div class="card">
-                <div class="card-header">
-                    <h2>📝 Your Details</h2>
-                </div>
-                <div class="card-body">
-
-                    <!-- Global error/info alert -->
-                    <div class="alert alert-error" id="globalAlert" role="alert"></div>
-
-                    <form id="registrationForm" novalidate>
-
-                        <!-- Full Name -->
-                        <div class="form-group">
-                            <label class="form-label" for="fullName">Full Name *</label>
-                            <input
-                                class="form-input"
-                                type="text"
-                                id="fullName"
-                                name="fullName"
-                                placeholder="e.g. Prasad Korgaonkar"
-                                autocomplete="name"
-                                maxlength="100"
-                                required>
-                            <div class="form-error" id="fullNameError">Please enter your full name (2–100 characters).</div>
-                        </div>
-
-                        <!-- Email -->
-                        <div class="form-group">
-                            <label class="form-label" for="email">Email Address *</label>
-                            <input
-                                class="form-input"
-                                type="email"
-                                id="email"
-                                name="email"
-                                placeholder="e.g. prasad@example.com"
-                                autocomplete="email"
-                                maxlength="150"
-                                required>
-                            <div class="form-error" id="emailError">Please enter a valid email address.</div>
-                        </div>
-
-                        <!-- Mobile Number -->
-                        <div class="form-group">
-                            <label class="form-label" for="mobileNumber">Mobile Number *</label>
-                            <input
-                                class="form-input"
-                                type="tel"
-                                id="mobileNumber"
-                                name="mobileNumber"
-                                placeholder="10-digit mobile number"
-                                autocomplete="tel"
-                                maxlength="10"
-                                pattern="[6-9]\d{9}"
-                                required>
-                            <div class="form-error" id="mobileError">Please enter a valid 10-digit Indian mobile number (starting with 6–9).</div>
-                        </div>
-
-                        <!-- Aadhaar Upload -->
-                        <div class="form-group">
-                            <label class="form-label">Aadhaar Card Document *</label>
-                            <div class="file-upload-zone" id="uploadZone">
-                                <input
-                                    type="file"
-                                    id="aadhaarDocument"
-                                    name="aadhaarDocument"
-                                    accept=".jpg,.jpeg,.png,.pdf"
-                                    aria-label="Upload Aadhaar document">
-                                <div class="upload-icon">📄</div>
-                                <div class="upload-text">
-                                    <strong>Click to upload</strong> or drag &amp; drop
-                                </div>
-                                <div class="upload-hint">JPG, PNG or PDF · Max 5 MB</div>
-                            </div>
-                            <div class="file-preview" id="filePreview">
-                                <span class="file-preview-icon" id="filePreviewIcon">📄</span>
+                    <div class="card-body">
+                        <div id="eventInfo" style="display:none">
+                            <div class="event-name" id="eventNameDisplay"></div>
+                            <div class="info-row">
+                                <span class="info-icon">📅</span>
                                 <div>
-                                    <div class="file-preview-name" id="filePreviewName"></div>
-                                    <div class="file-preview-size" id="filePreviewSize"></div>
+                                    <div class="info-label">Event Date</div>
+                                    <div class="info-value" id="eventDateDisplay">—</div>
                                 </div>
-                                <button type="button" class="file-remove" id="fileRemove" aria-label="Remove file">✕</button>
                             </div>
-                            <div class="form-error" id="aadhaarError">Please upload your Aadhaar card (JPG, PNG or PDF, max 5 MB).</div>
+                            <div class="info-row" style="flex-direction: column;">
+                                <div class="info-label" style="font-weight: bold; margin-bottom: 8px;">Age Categories & Fees:</div>
+                                <div id="eventCategoriesDisplay" style="width: 100%;"></div>
+                            </div>
+                            <div>
+                                <span class="badge-open" id="statusBadge">✓ Registration Open</span>
+                            </div>
+                            
+                            <!-- Registration Summary (Calculated Client Side) -->
+                            <div class="summary-card" id="regSummaryCard">
+                                <div class="summary-title">Your Registration Summary</div>
+                                <div class="summary-row">
+                                    <span class="summary-label">Age as of Event:</span>
+                                    <span class="summary-val" id="summaryAge">—</span>
+                                </div>
+                                <div class="summary-row">
+                                    <span class="summary-label">Eligible Category:</span>
+                                    <span class="summary-val" id="summaryCategory">—</span>
+                                </div>
+                                <div class="summary-row" style="margin-top:8px; padding-top:8px; border-top:1px solid #cce0ff;">
+                                    <span class="summary-label">Registration Fee:</span>
+                                    <span class="summary-val" id="summaryFee" style="color:var(--success); font-size:1.1rem;">—</span>
+                                </div>
+                            </div>
                         </div>
-
-                        <!-- Consent -->
-                        <div class="consent-box">
-                            <p>
-                                🔒 Your Aadhaar document will be stored securely and used only for identity
-                                verification. We comply with all applicable data protection regulations.
-                                By proceeding, you consent to the collection and secure storage of your
-                                identity document.
-                            </p>
-                            <label class="consent-check">
-                                <input type="checkbox" id="consentCheck" required>
-                                <span>I consent to the above and confirm the details provided are accurate.</span>
-                            </label>
-                            <div class="form-error" id="consentError">You must provide consent to register.</div>
+                        <div id="eventLoadError" style="display:none;color:#e74c3c;font-size:0.88rem;padding:8px 0;">
+                            ⚠️ Could not load event details. Please check the URL or try again.
                         </div>
-
-                        <!-- Submit -->
-                        <button type="submit" class="btn-register" id="registerBtn" disabled>
-                            <span class="btn-text">🚀 Register &amp; Pay</span>
-                            <span class="btn-spinner">⏳ Processing…</span>
-                        </button>
-
-                        <div class="security-note">
-                            🔐 Payments secured by Razorpay · 256-bit SSL encryption
-                        </div>
-
-                    </form>
+                    </div>
                 </div>
-            </div>
-        </section>
-    </div>
+            </aside>
+
+            <section>
+                <div class="card">
+                    <div class="card-header">
+                        <h2>📝 Registration Form</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-error" id="globalAlert" role="alert"></div>
+
+                        <form id="registrationForm" novalidate>
+                            <h3 style="font-size: 1.1rem; color: var(--primary-dark); margin-bottom: 12px;">A. Participant Details</h3>
+                            <div class="form-group">
+                                <label class="form-label" for="fullName">Full Name *</label>
+                                <input class="form-input" type="text" id="fullName" name="fullName" placeholder="e.g. Prasad Korgaonkar" required>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label" for="dob">Date of Birth *</label>
+                                    <input class="form-input" type="date" id="dob" name="dob" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="gender">Gender *</label>
+                                    <select class="form-input" id="gender" name="gender" required>
+                                        <option value="">Select Gender</option>
+                                        <option value="Male">Male</option>
+                                        <option value="Female">Female</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label" for="schoolName">School / College Name *</label>
+                                    <input class="form-input" type="text" id="schoolName" name="schoolName" placeholder="School Name" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="tShirtSize">T-Shirt Size *</label>
+                                    <select class="form-input" id="tShirtSize" name="tShirtSize" required>
+                                        <option value="">Select Size</option>
+                                        <option value="22">22</option>
+                                        <option value="24">24</option>
+                                        <option value="26">26</option>
+                                        <option value="28">28</option>
+                                        <option value="30">30</option>
+                                        <option value="32">32</option>
+                                        <option value="34">34</option>
+                                        <option value="36">36</option>
+                                        <option value="38">38</option>
+                                        <option value="40">40</option>
+                                        <option value="42">42</option>
+                                    </select>
+                                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">Please select carefully. Size changes may not be possible.</div>
+                                </div>
+                            </div>
+                            
+                            <hr style="border: 0; border-top: 1px solid var(--border); margin: 24px 0;">
+                            
+                            <h3 style="font-size: 1.1rem; color: var(--primary-dark); margin-bottom: 12px;">B. Contact & Address Details</h3>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label" for="mobileNumber">Mobile Number *</label>
+                                    <input class="form-input" type="tel" id="mobileNumber" name="mobileNumber" placeholder="10-digit number" pattern="[6-9]\d{9}" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="emailId">Email ID *</label>
+                                    <input class="form-input" type="email" id="emailId" name="emailId" placeholder="email@example.com" required>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label" for="address">Address *</label>
+                                <input class="form-input" type="text" id="address" name="address" placeholder="Street, landmark" required>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label" for="city">City / Village *</label>
+                                    <input class="form-input" type="text" id="city" name="city" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="district">District *</label>
+                                    <input class="form-input" type="text" id="district" name="district" required>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label" for="state">State *</label>
+                                    <input class="form-input" type="text" id="state" name="state" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="pinCode">PIN Code *</label>
+                                    <input class="form-input" type="text" id="pinCode" name="pinCode" required>
+                                </div>
+                            </div>
+
+                            <hr style="border: 0; border-top: 1px solid var(--border); margin: 24px 0;">
+
+                            <h3 style="font-size: 1.1rem; color: var(--primary-dark); margin-bottom: 12px;">C. Emergency Contact</h3>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label" for="emergencyContactName">Emergency Contact Name *</label>
+                                    <input class="form-input" type="text" id="emergencyContactName" name="emergencyContactName" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="emergencyContactNumber">Emergency Contact Number *</label>
+                                    <input class="form-input" type="text" id="emergencyContactNumber" name="emergencyContactNumber" required>
+                                </div>
+                            </div>
+                            
+                            <hr style="border: 0; border-top: 1px solid var(--border); margin: 24px 0;">
+
+                            <h3 style="font-size: 1.1rem; color: var(--primary-dark); margin-bottom: 12px;">D. Identity / Date of Birth Verification</h3>
+                            <div class="form-group">
+                                <label class="form-label">Upload ONE Valid Identity / Date of Birth Proof *</label>
+                                <div class="file-upload-zone" id="uploadZone">
+                                    <input type="file" id="aadhaarDocument" name="aadhaarDocument" accept=".jpg,.jpeg,.png,.pdf" aria-label="Upload Identity document" required>
+                                    <div class="upload-icon">📄</div>
+                                    <div class="upload-text">
+                                        <strong>Click to upload</strong> or drag &amp; drop
+                                    </div>
+                                    <div class="upload-hint">JPG, PNG or PDF · Max 5 MB</div>
+                                </div>
+                                <div class="file-preview" id="filePreview">
+                                    <span class="file-preview-icon" id="filePreviewIcon">📄</span>
+                                    <div>
+                                        <div class="file-preview-name" id="filePreviewName"></div>
+                                        <div class="file-preview-size" id="filePreviewSize"></div>
+                                    </div>
+                                    <button type="button" class="file-remove" id="fileRemove" aria-label="Remove file">✕</button>
+                                </div>
+                                <div style="font-size: 0.8rem; color: var(--danger); margin-top: 8px; background: #fdf0ee; padding: 8px; border-radius: 4px;">
+                                    <strong>Important:</strong> The document must be genuine, valid and clearly readable. If any false, forged, altered or incorrect information is found during verification, the participant's registration will be cancelled and the registration fee will not be refunded.
+                                </div>
+                            </div>
+                            
+                            <hr style="border: 0; border-top: 1px solid var(--border); margin: 24px 0;">
+
+                            <h3 style="font-size: 1.1rem; color: var(--primary-dark); margin-bottom: 12px;">E. Parent / Guardian Consent</h3>
+                            <div class="consent-box">
+                                <label class="consent-check">
+                                    <input type="checkbox" id="consentParent" name="consentParent" required>
+                                    <span>I am the parent/legal guardian of the participant and authorize the participant to participate in Sindhu Young Champions 2026. *</span>
+                                </label>
+                                <label class="consent-check">
+                                    <input type="checkbox" id="consentInfo" name="consentInfo" required>
+                                    <span>I confirm that all information provided during registration is correct and belongs to the participant. *</span>
+                                </label>
+                                <label class="consent-check">
+                                    <input type="checkbox" id="consentFit" name="consentFit" required>
+                                    <span>I confirm that the participant is fit to participate in the event. *</span>
+                                </label>
+                                <label class="consent-check">
+                                    <input type="checkbox" id="consentTerms" name="consentTerms" required>
+                                    <span>I agree to the Sindhu Young Champions 2026 Terms & Conditions. *</span>
+                                </label>
+                                <label class="consent-check" style="margin-top: 12px;">
+                                    <input type="checkbox" id="consentMedia" name="consentMedia">
+                                    <span>(Optional) I consent to photographs and videos of the participant captured during the event being used for event-related promotional purposes.</span>
+                                </label>
+                            </div>
+
+                            <button type="submit" class="btn-register" id="registerBtn" disabled>
+                                <span class="btn-text">🚀 Register &amp; Pay</span>
+                                <span class="btn-spinner">⏳ Processing…</span>
+                            </button>
+
+                            <div class="security-note">
+                                🔐 Payments secured by Razorpay · 256-bit SSL encryption
+                            </div>
+
+                        </form>
+                    </div>
+                </div>
+            </section>
+        </div>
     </div>
 </main>
 
 <script>
-    // ─── Configuration ──────────────────────────────────────────────────────
     const API_BASE = (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost') && window.location.port !== '8080'
         ? 'http://localhost:8080/api/v1'
         : '/api/v1';
 
-    // ─── Utilities ──────────────────────────────────────────────────────────
     const $ = id => document.getElementById(id);
 
     function getEventCode() {
@@ -850,20 +807,6 @@
         $('processingOverlay').classList.remove('visible');
     }
 
-    function setStep(n) {
-        [1, 2, 3].forEach(i => {
-            const s = $(`step${i}`);
-            s.classList.remove('active', 'done');
-            if (i < n) s.classList.add('done');
-            else if (i === n) s.classList.add('active');
-        });
-        [1, 2].forEach(i => {
-            const l = $(`line${i}`);
-            l.classList.toggle('done', i < n);
-        });
-    }
-
-    // ─── Routing ─────────────────────────────────────────────────────────────
     const eventCode = getEventCode();
 
     if (eventCode) {
@@ -876,14 +819,11 @@
         loadAllEvents();
     }
 
-    // ─── Load All Events ─────────────────────────────────────────────────────
     async function loadAllEvents() {
         try {
             const res = await fetch(`${API_BASE}/events`);
             const json = await res.json();
             
-            $('catalogSkeleton').style.display = 'none';
-
             if (!res.ok || !json.success) {
                 $('catalogError').textContent = json.message || 'Failed to load events.';
                 $('catalogError').style.display = 'block';
@@ -904,33 +844,27 @@
                 card.className = 'event-card';
                 card.href = `?event=${encodeURIComponent(evt.eventCode)}`;
                 
-                const startDate = formatDate(evt.startDate);
+                const startDate = formatDate(evt.eventDate);
                 
                 card.innerHTML = `
                     <h3>${evt.eventName}</h3>
                     <p>📅 ${startDate}</p>
-                    <p>🎟️ ${evt.availableSlots} slots left</p>
-                    <div class="fee">${formatCurrency(evt.registrationFee, evt.currency)}</div>
                 `;
                 grid.appendChild(card);
             });
 
         } catch (err) {
-            $('catalogSkeleton').style.display = 'none';
             $('catalogError').textContent = 'Error connecting to the server.';
             $('catalogError').style.display = 'block';
         }
     }
 
-    // ─── Step 1: Load Event ──────────────────────────────────────────────────
     let eventData = null;
 
     async function loadEvent(code) {
         try {
             const res = await fetch(`${API_BASE}/events/${encodeURIComponent(code)}`);
             const json = await res.json();
-
-            $('eventSkeleton').style.display = 'none';
 
             if (!res.ok || !json.success) {
                 $('eventLoadError').textContent = json.message || 'Event not found.';
@@ -940,48 +874,85 @@
 
             eventData = json.data;
 
-            // Populate event info
             $('pageTitle').textContent = 'Register — ' + eventData.eventName;
             document.title = 'Register — ' + eventData.eventName + ' | Sindhu Runners';
             $('eventNameDisplay').textContent = eventData.eventName;
+            $('eventDateDisplay').textContent = formatDate(eventData.eventDate);
 
-            const startDate = formatDate(eventData.startDate);
-            const endDate   = eventData.endDate && eventData.endDate !== eventData.startDate
-                              ? ' – ' + formatDate(eventData.endDate) : '';
-            $('eventDateDisplay').textContent = startDate + endDate;
+            // Display categories
+            const catContainer = $('eventCategoriesDisplay');
+            catContainer.innerHTML = '';
+            eventData.categories.forEach(cat => {
+                catContainer.innerHTML += `
+                    <div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:0.85rem;">
+                        <span>${cat.categoryName} (${cat.minAge}-${cat.maxAge} Yrs)</span>
+                        <span style="font-weight:600; color:var(--success);">${formatCurrency(cat.fee)}</span>
+                    </div>
+                `;
+            });
 
-            $('eventFeeDisplay').textContent = formatCurrency(eventData.registrationFee, eventData.currency);
-
-            const maxSlots  = eventData.availableSlots + (eventData.maxRegistrations || eventData.availableSlots);
-            const pctFull   = maxSlots > 0
-                ? Math.round(((maxSlots - eventData.availableSlots) / maxSlots) * 100) : 0;
-            $('slotsFill').style.width = pctFull + '%';
-            $('slotsFill').style.background = pctFull > 80
-                ? 'linear-gradient(90deg,#e74c3c,#e67e22)'
-                : 'linear-gradient(90deg,#27ae60,#2ecc71)';
-            $('slotsCount').textContent = eventData.availableSlots + ' slots remaining';
-
-            const open = eventData.registrationOpen && eventData.availableSlots > 0;
+            const open = eventData.active;
             $('statusBadge').textContent = open ? '✓ Registration Open' : '✗ Registration Closed';
             $('statusBadge').className = open ? 'badge-open' : 'badge-closed';
 
             $('eventInfo').style.display = 'block';
 
             if (!open) {
-                showAlert('Registration for this event is currently closed or full.');
+                showAlert('Registration for this event is currently closed.');
                 $('registerBtn').disabled = true;
             }
 
         } catch (err) {
-            $('eventSkeleton').style.display = 'none';
             $('eventLoadError').textContent = 'Network error. Please refresh the page.';
             $('eventLoadError').style.display = 'block';
         }
     }
 
-    loadEvent();
+    // Age Calculation
+    function calculateAge(dobStr, eventDateStr) {
+        const dob = new Date(dobStr);
+        const evDate = new Date(eventDateStr);
+        let age = evDate.getFullYear() - dob.getFullYear();
+        const m = evDate.getMonth() - dob.getMonth();
+        if (m < 0 || (m === 0 && evDate.getDate() < dob.getDate())) {
+            age--;
+        }
+        return age;
+    }
 
-    // ─── File Upload Handling ───────────────────────────────────────────────
+    $('dob').addEventListener('change', function() {
+        if(!eventData) return;
+        const dobStr = this.value;
+        if(!dobStr) {
+            $('regSummaryCard').classList.remove('visible');
+            checkFormValidity();
+            return;
+        }
+
+        const age = calculateAge(dobStr, eventData.eventDate);
+        $('summaryAge').textContent = age + ' Years';
+
+        let matchedCat = null;
+        for (const cat of eventData.categories) {
+            if (age >= cat.minAge && age <= cat.maxAge) {
+                matchedCat = cat;
+                break;
+            }
+        }
+
+        if (matchedCat) {
+            $('summaryCategory').textContent = matchedCat.categoryName;
+            $('summaryFee').textContent = formatCurrency(matchedCat.fee);
+            $('regSummaryCard').classList.add('visible');
+        } else {
+            $('summaryCategory').textContent = 'Not Eligible (Age limit)';
+            $('summaryFee').textContent = '—';
+            $('regSummaryCard').classList.add('visible');
+        }
+        checkFormValidity();
+    });
+
+    // File Upload Handling
     const uploadZone  = $('uploadZone');
     const fileInput   = $('aadhaarDocument');
     const filePreview = $('filePreview');
@@ -989,15 +960,13 @@
     const MAX_SIZE = 5 * 1024 * 1024; // 5 MB
 
     function handleFile(file) {
-        clearFieldError('aadhaarError', fileInput);
-
         if (!ALLOWED_TYPES.includes(file.type)) {
-            showFieldError('aadhaarError', fileInput, 'File type not allowed. Use JPG, PNG or PDF.');
+            alert('File type not allowed. Use JPG, PNG or PDF.');
             fileInput.value = '';
             return;
         }
         if (file.size > MAX_SIZE) {
-            showFieldError('aadhaarError', fileInput, 'File is too large. Maximum size is 5 MB.');
+            alert('File is too large. Maximum size is 5 MB.');
             fileInput.value = '';
             return;
         }
@@ -1008,6 +977,7 @@
         $('filePreviewSize').textContent = formatBytes(file.size);
         filePreview.classList.add('visible');
         uploadZone.style.display = 'none';
+        checkFormValidity();
     }
 
     fileInput.addEventListener('change', e => {
@@ -1018,6 +988,7 @@
         fileInput.value = '';
         filePreview.classList.remove('visible');
         uploadZone.style.display = 'block';
+        checkFormValidity();
     });
 
     uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('drag-over'); });
@@ -1034,86 +1005,79 @@
         }
     });
 
-    // ─── Form validation helpers ─────────────────────────────────────────────
-    function showFieldError(errorId, inputEl, msg) {
-        const errEl = $(errorId);
-        if (msg) errEl.textContent = msg;
-        errEl.classList.add('visible');
-        inputEl.classList.add('error');
+    function checkFormValidity() {
+        if (!eventData || !eventData.active) return false;
+        
+        const dobStr = $('dob').value;
+        let eligible = false;
+        if(dobStr) {
+            const age = calculateAge(dobStr, eventData.eventDate);
+            for (const cat of eventData.categories) {
+                if (age >= cat.minAge && age <= cat.maxAge) {
+                    eligible = true;
+                    break;
+                }
+            }
+        }
+
+        const requiredConsents = $('consentParent').checked && 
+                                 $('consentInfo').checked && 
+                                 $('consentFit').checked && 
+                                 $('consentTerms').checked;
+
+        const hasFile = fileInput.files.length > 0;
+        
+        const btn = $('registerBtn');
+        if (eligible && requiredConsents && hasFile) {
+            btn.disabled = false;
+        } else {
+            btn.disabled = true;
+        }
     }
 
-    function clearFieldError(errorId, inputEl) {
-        $(errorId).classList.remove('visible');
-        if (inputEl) inputEl.classList.remove('error');
-    }
-
-    function validateForm() {
-        let valid = true;
-
-        const name = $('fullName').value.trim();
-        if (!name || name.length < 2) {
-            showFieldError('fullNameError', $('fullName'));
-            valid = false;
-        } else clearFieldError('fullNameError', $('fullName'));
-
-        const email = $('email').value.trim();
-        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-            showFieldError('emailError', $('email'));
-            valid = false;
-        } else clearFieldError('emailError', $('email'));
-
-        const mobile = $('mobileNumber').value.trim();
-        if (!mobile || !/^[6-9]\d{9}$/.test(mobile)) {
-            showFieldError('mobileError', $('mobileNumber'));
-            valid = false;
-        } else clearFieldError('mobileError', $('mobileNumber'));
-
-        if (!fileInput.files.length) {
-            showFieldError('aadhaarError', fileInput, 'Please upload your Aadhaar document.');
-            valid = false;
-        } else clearFieldError('aadhaarError', fileInput);
-
-        if (!$('consentCheck').checked) {
-            $('consentError').classList.add('visible');
-            valid = false;
-        } else $('consentError').classList.remove('visible');
-
-        return valid;
-    }
-
-    // Enable button only when consent is checked
-    $('consentCheck').addEventListener('change', () => {
-        $('registerBtn').disabled = !$('consentCheck').checked;
+    ['consentParent', 'consentInfo', 'consentFit', 'consentTerms', 'fullName', 'dob'].forEach(id => {
+        $(id).addEventListener('change', checkFormValidity);
+        $(id).addEventListener('input', checkFormValidity);
     });
 
-    // ─── Form Submission ─────────────────────────────────────────────────────
     $('registrationForm').addEventListener('submit', async function (e) {
         e.preventDefault();
         hideAlert();
 
-        if (!validateForm()) return;
-        if (!eventData || !eventData.registrationOpen) {
+        if (!eventData || !eventData.active) {
             showAlert('Registration is not available for this event.');
             return;
         }
 
-        // Disable button to prevent double-submission
         const btn = $('registerBtn');
         btn.disabled = true;
         btn.classList.add('loading');
 
-        showOverlay('Uploading document…', 'Securely uploading your Aadhaar document.');
-        setStep(2);
+        showOverlay('Processing…', 'Securely uploading your document and initiating payment.');
 
         try {
-            // Build multipart form
             const formData = new FormData();
-            formData.append('fullName',      $('fullName').value.trim());
-            formData.append('email',         $('email').value.trim().toLowerCase());
-            formData.append('mobileNumber',  $('mobileNumber').value.trim());
+            formData.append('fullName', $('fullName').value);
+            formData.append('dob', $('dob').value);
+            formData.append('gender', $('gender').value);
+            formData.append('schoolName', $('schoolName').value);
+            formData.append('tShirtSize', $('tShirtSize').value);
+            formData.append('mobileNumber', $('mobileNumber').value);
+            formData.append('emailId', $('emailId').value);
+            formData.append('address', $('address').value);
+            formData.append('city', $('city').value);
+            formData.append('district', $('district').value);
+            formData.append('state', $('state').value);
+            formData.append('pinCode', $('pinCode').value);
+            formData.append('emergencyContactName', $('emergencyContactName').value);
+            formData.append('emergencyContactNumber', $('emergencyContactNumber').value);
             formData.append('aadhaarDocument', fileInput.files[0]);
+            formData.append('consentParent', $('consentParent').checked);
+            formData.append('consentInfo', $('consentInfo').checked);
+            formData.append('consentFit', $('consentFit').checked);
+            formData.append('consentTerms', $('consentTerms').checked);
+            formData.append('consentMedia', $('consentMedia').checked);
 
-            // Step 1: Create registration + Razorpay order
             const regRes = await fetch(
                 `${API_BASE}/events/${encodeURIComponent(eventCode)}/registrations`,
                 { method: 'POST', body: formData }
@@ -1127,7 +1091,6 @@
             const regData = regJson.data;
             hideOverlay();
 
-            // Step 2: Open Razorpay Checkout
             const options = {
                 key:         regData.razorpayKeyId,
                 amount:      regData.amountInPaise,
@@ -1147,18 +1110,14 @@
 
                 modal: {
                     ondismiss: function () {
-                        // User closed checkout — allow re-try
                         btn.disabled = false;
                         btn.classList.remove('loading');
-                        setStep(1);
                         showAlert('Payment was cancelled. You can try again.');
                     }
                 },
 
                 handler: async function (response) {
-                    // Payment completed in Razorpay — verify server-side
                     showOverlay('Verifying payment…', 'Please wait while we confirm your payment.');
-                    setStep(3);
 
                     try {
                         const verifyRes = await fetch(`${API_BASE}/payments/verify`, {
@@ -1177,13 +1136,13 @@
                             throw new Error(verifyJson.message || 'Payment verification failed.');
                         }
 
-                        // Redirect to success page
                         const d = verifyJson.data;
                         const params = new URLSearchParams({
                             regId:  d.registrationId,
                             regNum: d.registrationNumber || '',
                             event:  d.eventName,
                             name:   d.fullName,
+                            category: d.categoryName || '',
                             amount: d.amount,
                             status: d.status
                         });
@@ -1192,14 +1151,9 @@
 
                     } catch (err) {
                         hideOverlay();
-                        showAlert(
-                            '⚠️ ' + (err.message || 'Verification error.') +
-                            ' Your payment may have been received. Please contact support with your order ID: ' +
-                            regData.razorpayOrderId
-                        );
+                        showAlert('⚠️ ' + (err.message || 'Verification error. Please contact support.'));
                         btn.disabled = false;
                         btn.classList.remove('loading');
-                        setStep(1);
                     }
                 }
             };
@@ -1210,7 +1164,6 @@
                 showAlert('Payment failed: ' + (response.error.description || 'Please try again.'));
                 btn.disabled = false;
                 btn.classList.remove('loading');
-                setStep(1);
             });
             rzp.open();
 
@@ -1219,7 +1172,6 @@
             showAlert('⚠️ ' + (err.message || 'An unexpected error occurred. Please try again.'));
             btn.disabled = false;
             btn.classList.remove('loading');
-            setStep(1);
         }
     });
 </script>

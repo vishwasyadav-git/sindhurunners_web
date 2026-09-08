@@ -39,7 +39,7 @@ public interface RegistrationRepository extends JpaRepository<Registration, Stri
      * Check if a PAID registration already exists for the given email on the given event.
      * Useful as a soft duplicate check (email + event combination).
      */
-    boolean existsByEmailAndEventIdAndStatus(String email, Long eventId, RegistrationStatus status);
+    boolean existsByEmailIdAndEventIdAndStatus(String emailId, Long eventId, RegistrationStatus status);
 
     /** Count PAID registrations for an event (admin dashboard). */
     long countByEventIdAndStatus(Long eventId, RegistrationStatus status);

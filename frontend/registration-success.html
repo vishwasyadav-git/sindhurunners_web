@@ -338,6 +338,13 @@
                         </div>
                     </div>
                     <div class="details-row">
+                        <div class="details-icon">🏅</div>
+                        <div>
+                            <div class="details-label">Category</div>
+                            <div class="details-value" id="detailCategory">—</div>
+                        </div>
+                    </div>
+                    <div class="details-row">
                         <div class="details-icon">💳</div>
                         <div>
                             <div class="details-label">Amount Paid</div>
@@ -407,6 +414,7 @@
     const regNum     = params.get('regNum') || '';
     const eventName  = params.get('event')  || 'Sindhu Runners Event';
     const name       = params.get('name')   || '';
+    const category   = params.get('category') || '';
     const amount     = params.get('amount') || '';
     const status     = params.get('status') || '';
 
@@ -415,7 +423,7 @@
         return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 0 }).format(amt);
     }
 
-    function showSuccess(registrationNumber, evtName, regName, regAmount) {
+    function showSuccess(registrationNumber, evtName, regName, regCategory, regAmount) {
         document.getElementById('pollingView').style.display = 'none';
         document.getElementById('pendingView').style.display = 'none';
         document.getElementById('successView').style.display = 'block';
@@ -423,6 +431,7 @@
         document.getElementById('regNumberDisplay').textContent = registrationNumber || '—';
         document.getElementById('detailEvent').textContent = evtName || '—';
         document.getElementById('detailName').textContent  = regName || '—';
+        document.getElementById('detailCategory').textContent = regCategory || '—';
         document.getElementById('detailAmount').textContent = formatCurrency(regAmount);
         document.title = 'Registered! ' + (registrationNumber || '') + ' — Sindhu Runners';
     }
@@ -435,7 +444,7 @@
 
     // Try to show success immediately if params are available
     if (status === 'PAID' && regNum) {
-        showSuccess(regNum, eventName, name, amount);
+        showSuccess(regNum, eventName, name, category, amount);
     } else if (regId) {
         // Poll the registration status endpoint
         pollStatus();
@@ -455,7 +464,7 @@
             if (res.ok && json.success && json.data) {
                 const d = json.data;
                 if (d.status === 'PAID' && d.registrationNumber) {
-                    showSuccess(d.registrationNumber, d.eventName, d.fullName, d.amount);
+                    showSuccess(d.registrationNumber, d.eventName, d.fullName, d.categoryName, d.amount);
                     return;
                 }
             }
