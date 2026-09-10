@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard — Sindhu Runners</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;500;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        /* ─── Reset & Base ─────────────────────────────────────────────────── */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --primary:       #1a6fc4;
+            --primary-dark:  #134fa3;
+            --accent:        #e67e22;
+            --success:       #27ae60;
+            --danger:        #e74c3c;
+            --text:          #1c2333;
+            --text-muted:    #5a6478;
+            --border:        #d4dce8;
+            --bg-grad-start: #b8d9f0;
+            --bg-grad-mid:   #aee6d8;
+            --bg-grad-end:   #add8e6;
+            --card-bg:       rgba(255,255,255,0.92);
+            --card-shadow:   0 8px 30px rgba(26,111,196,0.1), 0 2px 10px rgba(0,0,0,0.05);
+            --radius:        16px;
+            --radius-sm:     8px;
+            --transition:    0.22s ease;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(160deg, var(--bg-grad-start) 0%, var(--bg-grad-mid) 50%, var(--bg-grad-end) 100%);
+            min-height: 100vh;
+            color: var(--text);
+        }
+
+        /* ─── Header ────────────────────────────────────────────────────────── */
+        .site-header {
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        }
+
+        .title-block h1 {
+            font-family: 'Roboto Condensed', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+            letter-spacing: 0.5px;
+        }
+        .title-block p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .back-link {
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: color var(--transition);
+        }
+        .back-link:hover { color: var(--primary-dark); }
+
+        /* ─── Main Layout ───────────────────────────────────────────────────── */
+        .page-wrapper {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px 80px;
+        }
+
+        .header-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 30px;
+        }
+
+        .page-title {
+            font-family: 'Roboto Condensed', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+            letter-spacing: 0.5px;
+        }
+
+        .btn-create {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, var(--primary) 0%, #1a8fc4 100%);
+            color: #fff;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 0.95rem;
+            font-family: 'Roboto Condensed', sans-serif;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all var(--transition);
+            box-shadow: 0 4px 15px rgba(26,111,196,0.3);
+        }
+        .btn-create:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(26,111,196,0.4);
+        }
+
+        /* ─── Grid & Cards ──────────────────────────────────────────────────── */
+        .events-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 24px;
+        }
+
+        .event-card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--card-shadow);
+            backdrop-filter: blur(6px);
+            border: 1px solid rgba(255,255,255,0.6);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: transform var(--transition), box-shadow var(--transition);
+        }
+        .event-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(26,111,196,0.15), 0 4px 12px rgba(0,0,0,0.06);
+        }
+
+        .card-header {
+            padding: 20px;
+            background: linear-gradient(135deg, #f8fafd 0%, #e8f1fc 100%);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        .card-header-main h3 {
+            font-family: 'Roboto Condensed', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 4px;
+        }
+        .card-header-main p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-family: monospace;
+            background: #dde5f0;
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .status-badge {
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 4px 8px;
+            border-radius: 12px;
+            text-transform: uppercase;
+        }
+        .status-badge.active {
+            background: #eaf9ef;
+            color: #1e7e34;
+            border: 1px solid #b2dfcc;
+        }
+        .status-badge.inactive {
+            background: #fdf0ee;
+            color: #922b21;
+            border: 1px solid #f5c6c0;
+        }
+
+        .card-body {
+            padding: 20px;
+            flex: 1;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            font-size: 0.9rem;
+        }
+        .info-label {
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+        .info-value {
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .card-footer {
+            padding: 16px 20px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 12px;
+            background: #fff;
+        }
+
+        .btn-edit, .btn-delete {
+            flex: 1;
+            padding: 8px;
+            text-align: center;
+            border-radius: var(--radius-sm);
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all var(--transition);
+        }
+        .btn-edit {
+            background: var(--primary-light);
+            color: var(--primary-dark);
+            border: 1px solid #cce0f5;
+        }
+        .btn-edit:hover {
+            background: #d9eaf7;
+        }
+        
+        .btn-delete {
+            background: #fdf0ee;
+            color: var(--danger);
+            border: 1px solid #f5c6c0;
+        }
+        .btn-delete:hover {
+            background: #fadbd8;
+        }
+
+        /* ─── Global alert ──────────────────────────────────────────────────── */
+        .alert {
+            padding: 14px 18px;
+            border-radius: var(--radius-sm);
+            font-size: 0.88rem;
+            margin-bottom: 20px;
+            display: none;
+            line-height: 1.5;
+        }
+        .alert.visible { display: block; }
+        .alert-error { background: #fdf0ee; border: 1px solid #f5c6c0; color: #922b21; }
+        .alert-success { background: #eaf9ef; border: 1px solid #b2dfcc; color: #1e7e34; }
+
+        .loading-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            grid-column: 1 / -1;
+        }
+
+    </style>
+</head>
+<body>
+
+    <header class="site-header">
+        <div class="title-block">
+            <h1>Sindhu Runners</h1>
+            <p>Admin Dashboard</p>
+        </div>
+        <a href="index.html" class="back-link">← Back to Home</a>
+    </header>
+
+    <div class="page-wrapper">
+        
+        <div class="header-actions">
+            <div>
+                <h1 class="page-title">Events Overview</h1>
+            </div>
+            <a href="admin-create-event.html" class="btn-create">+ Create New Event</a>
+        </div>
+
+        <div id="globalAlert" class="alert alert-error"></div>
+        <div id="successAlert" class="alert alert-success"></div>
+
+        <div class="events-grid" id="eventsGrid">
+            <div class="loading-state">Loading events...</div>
+        </div>
+
+    </div>
+
+    <script>
+        const API_BASE = (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost') && window.location.port !== '8080'
+            ? 'http://localhost:8080/api/v1/admin'
+            : '/api/v1/admin';
+
+        const $ = id => document.getElementById(id);
+
+        function showAlert(msg, isSuccess = false) {
+            const el = isSuccess ? $('successAlert') : $('globalAlert');
+            const other = isSuccess ? $('globalAlert') : $('successAlert');
+            other.classList.remove('visible');
+            el.textContent = msg;
+            el.classList.add('visible');
+            setTimeout(() => el.classList.remove('visible'), 5000);
+        }
+
+        async function loadEvents() {
+            const grid = $('eventsGrid');
+            try {
+                const res = await fetch(`${API_BASE}/events`);
+                const json = await res.json();
+                
+                if (!res.ok || !json.success) {
+                    throw new Error(json.message || 'Failed to load events.');
+                }
+
+                const events = json.data;
+                if (events.length === 0) {
+                    grid.innerHTML = `<div class="loading-state">No events found. Create one to get started!</div>`;
+                    return;
+                }
+
+                grid.innerHTML = '';
+                events.forEach(ev => {
+                    const statusClass = ev.active ? 'active' : 'inactive';
+                    const statusText = ev.active ? 'Active' : 'Disabled';
+                    
+                    const dateObj = new Date(ev.eventDate);
+                    const formattedDate = dateObj.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+
+                    const closeObj = new Date(ev.registrationClosesAt);
+                    const closeDate = closeObj.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+
+                    const card = document.createElement('div');
+                    card.className = 'event-card';
+                    card.innerHTML = `
+                        <div class="card-header">
+                            <div class="card-header-main">
+                                <h3>${ev.eventName}</h3>
+                                <p>${ev.eventCode}</p>
+                            </div>
+                            <span class="status-badge ${statusClass}">${statusText}</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="info-row">
+                                <span class="info-label">Event Date:</span>
+                                <span class="info-value">${formattedDate}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Reg Closes:</span>
+                                <span class="info-value">${closeDate}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Categories:</span>
+                                <span class="info-value">${ev.categories.length}</span>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <a href="admin-update-event.html?id=${ev.id}" class="btn-edit" onclick="localStorage.setItem('editEventId', '${ev.id}')">Edit</a>
+                            ${ev.active ? `<button class="btn-delete" onclick="disableEvent(${ev.id}, '${ev.eventName}')">Disable</button>` : `<button class="btn-delete" disabled style="opacity: 0.5; cursor: not-allowed">Disabled</button>`}
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                });
+
+            } catch (err) {
+                grid.innerHTML = `<div class="loading-state" style="color:var(--danger)">Error: ${err.message}</div>`;
+            }
+        }
+
+        async function disableEvent(id, name) {
+            if (!confirm(`Are you sure you want to disable "${name}"? Registrations will be closed.`)) return;
+            
+            try {
+                const res = await fetch(`${API_BASE}/events/${id}`, { method: 'DELETE' });
+                const json = await res.json();
+                
+                if (!res.ok || !json.success) {
+                    throw new Error(json.message || 'Failed to disable event.');
+                }
+
+                showAlert('Event disabled successfully.', true);
+                loadEvents(); // refresh grid
+
+            } catch(err) {
+                showAlert(err.message);
+            }
+        }
+
+        // Initialize
+        loadEvents();
+
+    </script>
+</body>
+</html>

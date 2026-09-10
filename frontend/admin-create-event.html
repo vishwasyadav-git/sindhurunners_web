@@ -19,10 +19,8 @@
             --primary-dark:  #134fa3;
             --primary-light: #e8f1fc;
             --accent:        #e67e22;
-            --accent-dark:   #cf6d17;
             --success:       #27ae60;
             --danger:        #e74c3c;
-            --warning:       #f39c12;
             --text:          #1c2333;
             --text-muted:    #5a6478;
             --border:        #d4dce8;
@@ -51,24 +49,21 @@
             padding: 12px 24px;
             display: flex;
             align-items: center;
-            gap: 16px;
+            justify-content: space-between;
             position: sticky;
             top: 0;
             z-index: 100;
             box-shadow: 0 2px 12px rgba(0,0,0,0.06);
         }
 
-        .site-header img { height: 48px; }
-
-        .site-header .title-block { flex: 1; }
-        .site-header .title-block h1 {
+        .title-block h1 {
             font-family: 'Roboto Condensed', sans-serif;
             font-size: 1.4rem;
             font-weight: 700;
             color: var(--primary-dark);
             letter-spacing: 0.5px;
         }
-        .site-header .title-block p {
+        .title-block p {
             font-size: 0.8rem;
             color: var(--text-muted);
         }
@@ -87,7 +82,7 @@
 
         /* ─── Main Layout ───────────────────────────────────────────────────── */
         .page-wrapper {
-            max-width: 700px;
+            max-width: 800px;
             margin: 0 auto;
             padding: 40px 20px 80px;
         }
@@ -117,11 +112,15 @@
             backdrop-filter: blur(6px);
             border: 1px solid rgba(255,255,255,0.6);
             overflow: hidden;
+            margin-bottom: 24px;
         }
 
         .card-header {
             background: linear-gradient(135deg, var(--primary) 0%, #1a8fc4 100%);
             padding: 20px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         .card-header h2 {
             font-family: 'Roboto Condensed', sans-serif;
@@ -175,14 +174,6 @@
             box-shadow: 0 0 0 3px rgba(26,111,196,0.12);
         }
 
-        .form-error {
-            color: var(--danger);
-            font-size: 0.78rem;
-            margin-top: 4px;
-            display: none;
-        }
-        .form-error.visible { display: block; }
-
         .checkbox-group {
             display: flex;
             align-items: center;
@@ -200,8 +191,63 @@
             cursor: pointer;
         }
 
+        /* ─── Dynamic Categories ────────────────────────────────────────────── */
+        .category-row {
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+            margin-bottom: 16px;
+            padding: 16px;
+            background: #f8fafd;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            position: relative;
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .category-row .form-group {
+            margin-bottom: 0;
+            flex: 1;
+        }
+        .category-row .form-group.small {
+            flex: 0.6;
+        }
+
+        .btn-remove-row {
+            background: #fdf0ee;
+            color: var(--danger);
+            border: 1px solid #f5c6c0;
+            border-radius: var(--radius-sm);
+            padding: 11px 14px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all var(--transition);
+        }
+        .btn-remove-row:hover {
+            background: #fadbd8;
+        }
+
+        .btn-add-row {
+            background: #eaf9ef;
+            color: #1e7e34;
+            border: 1px solid #b2dfcc;
+            padding: 8px 16px;
+            border-radius: var(--radius-sm);
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+        .btn-add-row:hover {
+            background: #d4edda;
+        }
+
         /* ─── Submit button ─────────────────────────────────────────────────── */
-        .btn-register {
+        .btn-save {
             width: 100%;
             padding: 15px;
             background: linear-gradient(135deg, var(--primary) 0%, #1a8fc4 100%);
@@ -215,10 +261,14 @@
             cursor: pointer;
             transition: all var(--transition);
         }
-        .btn-register:hover:not(:disabled) {
+        .btn-save:hover:not(:disabled) {
             background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
             transform: translateY(-1px);
             box-shadow: 0 6px 20px rgba(26,111,196,0.35);
+        }
+        .btn-save:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
         }
 
         /* ─── Global alert ──────────────────────────────────────────────────── */
@@ -243,9 +293,7 @@
             <h1>Sindhu Runners</h1>
             <p>Admin Dashboard</p>
         </div>
-        <a href="index.html" class="back-link">
-            ← Back to Home
-        </a>
+        <a href="admin-events.html" class="back-link">← Back to Events</a>
     </header>
 
     <div class="page-wrapper">
@@ -255,20 +303,21 @@
         <div id="globalAlert" class="alert alert-error"></div>
         <div id="successAlert" class="alert alert-success"></div>
 
-        <div class="card">
-            <div class="card-header">
-                <h2>Event Details</h2>
-            </div>
-            <div class="card-body">
-                <form id="createEventForm">
+        <form id="eventForm">
+            <!-- Basic Details -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>Event Details</h2>
+                </div>
+                <div class="card-body">
                     <div class="form-row">
                         <div class="form-group">
                             <label class="form-label" for="eventCode">Event Code *</label>
-                            <input type="text" id="eventCode" class="form-input" placeholder="e.g. EVT2026" required>
+                            <input type="text" id="eventCode" class="form-input" placeholder="e.g. SYC2026" required>
                         </div>
                         <div class="form-group">
                             <label class="form-label" for="eventName">Event Name *</label>
-                            <input type="text" id="eventName" class="form-input" placeholder="e.g. Intercity Run 2026" required>
+                            <input type="text" id="eventName" class="form-input" placeholder="e.g. Sindhu Young Champions" required>
                         </div>
                     </div>
 
@@ -279,103 +328,159 @@
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label class="form-label" for="registrationFee">Registration Fee (INR) *</label>
-                            <input type="number" id="registrationFee" class="form-input" min="0" step="0.01" value="0" required>
+                            <label class="form-label" for="eventDate">Event Date *</label>
+                            <input type="date" id="eventDate" class="form-input" required>
                         </div>
                         <div class="form-group">
-                            <label class="form-label" for="maxRegistrations">Max Registrations *</label>
-                            <input type="number" id="maxRegistrations" class="form-input" min="1" value="1000" required>
+                            <label class="form-label" for="registrationClosesAt">Registration Closes At *</label>
+                            <input type="datetime-local" id="registrationClosesAt" class="form-input" required>
                         </div>
                     </div>
 
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label class="form-label" for="startDate">Start Date</label>
-                            <input type="date" id="startDate" class="form-input">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label" for="endDate">End Date</label>
-                            <input type="date" id="endDate" class="form-input">
-                        </div>
+                    <div class="checkbox-group" style="margin-bottom:0;">
+                        <input type="checkbox" id="isActive" checked>
+                        <label for="isActive">Event is Active (Visible & Open)</label>
                     </div>
-
-                    <div class="checkbox-group">
-                        <input type="checkbox" id="registrationOpen" checked>
-                        <label for="registrationOpen">Accept Registrations Immediately</label>
-                    </div>
-
-                    <button type="submit" class="btn-register" id="submitBtn">
-                        <span class="btn-text">Create Event</span>
-                    </button>
-                </form>
+                </div>
             </div>
-        </div>
+
+            <!-- Categories -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>Event Categories</h2>
+                    <button type="button" class="btn-add-row" onclick="addCategoryRow()">+ Add Category</button>
+                </div>
+                <div class="card-body" id="categoriesContainer">
+                    <!-- Dynamic categories go here -->
+                </div>
+            </div>
+
+            <button type="submit" class="btn-save" id="submitBtn">
+                Save Event
+            </button>
+        </form>
     </div>
 
     <script>
+        const API_BASE = (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost') && window.location.port !== '8080'
+            ? 'http://localhost:8080/api/v1/admin'
+            : '/api/v1/admin';
+
         const $ = id => document.getElementById(id);
+
+        let categoryCount = 0;
 
         function showAlert(msg, isSuccess = false) {
             const el = isSuccess ? $('successAlert') : $('globalAlert');
             const other = isSuccess ? $('globalAlert') : $('successAlert');
-            
             other.classList.remove('visible');
             el.textContent = msg;
             el.classList.add('visible');
-            el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            if (isSuccess) setTimeout(() => el.classList.remove('visible'), 5000);
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
 
-        $('createEventForm').addEventListener('submit', async (e) => {
+        function addCategoryRow() {
+            const id = categoryCount++;
+            const div = document.createElement('div');
+            div.className = 'category-row';
+            div.id = `cat_row_${id}`;
+            
+            div.innerHTML = `
+                <div class="form-group">
+                    <label class="form-label">Category Name</label>
+                    <input type="text" class="form-input cat-name" placeholder="e.g. 5 KM" required>
+                </div>
+                <div class="form-group small">
+                    <label class="form-label">Min Age</label>
+                    <input type="number" class="form-input cat-min-age" placeholder="0" required>
+                </div>
+                <div class="form-group small">
+                    <label class="form-label">Max Age</label>
+                    <input type="number" class="form-input cat-max-age" placeholder="99" required>
+                </div>
+                <div class="form-group small">
+                    <label class="form-label">Fee (INR)</label>
+                    <input type="number" step="0.01" class="form-input cat-fee" placeholder="0.00" required>
+                </div>
+                <button type="button" class="btn-remove-row" onclick="removeCategoryRow(${id})">X</button>
+            `;
+            $('categoriesContainer').appendChild(div);
+        }
+
+        function removeCategoryRow(id) {
+            const row = $(`cat_row_${id}`);
+            if (row) row.remove();
+        }
+
+        $('eventForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
             $('globalAlert').classList.remove('visible');
             $('successAlert').classList.remove('visible');
             const btn = $('submitBtn');
             btn.disabled = true;
-            btn.textContent = 'Creating...';
+            btn.textContent = 'Saving...';
+
+            // Gather categories
+            const categoryElements = document.querySelectorAll('.category-row');
+            const categories = [];
+            categoryElements.forEach(row => {
+                categories.push({
+                    categoryName: row.querySelector('.cat-name').value.trim(),
+                    minAge: parseInt(row.querySelector('.cat-min-age').value),
+                    maxAge: parseInt(row.querySelector('.cat-max-age').value),
+                    fee: parseFloat(row.querySelector('.cat-fee').value)
+                });
+            });
+
+            if (categories.length === 0) {
+                showAlert("Please add at least one category.");
+                btn.disabled = false;
+                btn.textContent = 'Save Event';
+                return;
+            }
+
+            let regCloseStr = $('registrationClosesAt').value;
+            if (regCloseStr.length === 16) regCloseStr += ":00";
 
             const payload = {
                 eventCode: $('eventCode').value.trim(),
                 eventName: $('eventName').value.trim(),
                 description: $('description').value.trim(),
-                registrationFee: parseFloat($('registrationFee').value),
-                maxRegistrations: parseInt($('maxRegistrations').value, 10),
-                startDate: $('startDate').value || null,
-                endDate: $('endDate').value || null,
-                registrationOpen: $('registrationOpen').checked
+                eventDate: $('eventDate').value,
+                registrationClosesAt: regCloseStr,
+                isActive: $('isActive').checked,
+                categories: categories
             };
 
             try {
-                // Determine API URL (handle both Live Server and proper backend)
-                const apiUrl = window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost' 
-                    ? 'http://localhost:8080/api/v1/events' 
-                    : '/api/v1/events';
-
-                const response = await fetch(apiUrl, {
+                const response = await fetch(`${API_BASE}/events`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
 
                 const data = await response.json();
 
-                if (!response.ok) {
-                    throw new Error(data.error?.details || data.error?.message || 'Failed to create event');
+                if (!response.ok || !data.success) {
+                    throw new Error(data.message || 'Failed to create event');
                 }
 
-                showAlert('Event created successfully! You can now register for it.', true);
-                $('createEventForm').reset();
-                
+                showAlert('Event created successfully!', true);
+                setTimeout(() => { window.location.href = 'admin-events.html'; }, 1500);
+
             } catch (err) {
                 showAlert(err.message);
             } finally {
                 btn.disabled = false;
-                btn.textContent = 'Create Event';
+                btn.textContent = 'Save Event';
             }
         });
+
+        // Init with one blank category
+        addCategoryRow();
+
     </script>
 </body>
 </html>
