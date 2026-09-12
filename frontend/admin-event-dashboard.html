@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Dashboard — Sindhu Runners Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;500;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1a6fc4;
+            --primary-dark: #134fa3;
+            --secondary: #eef2f6;
+            --success: #2e7d32;
+            --warning: #f57c00;
+            --danger: #d32f2f;
+            --text-dark: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --radius: 12px;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
+            --shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+            --transition: all 0.2s ease;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text-dark);
+            line-height: 1.5;
+        }
+
+        .navbar {
+            background: var(--card-bg);
+            padding: 1rem 2rem;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .navbar-brand {
+            font-family: 'Roboto Condensed', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .nav-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            margin-left: 1.5rem;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .nav-links a:hover { color: var(--primary); }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 2rem;
+        }
+
+        .page-title {
+            font-family: 'Roboto Condensed', sans-serif;
+            font-size: 2rem;
+            color: var(--text-dark);
+        }
+        
+        .page-subtitle {
+            color: var(--text-muted);
+            font-size: 1rem;
+            margin-top: 0.25rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.25rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            text-decoration: none;
+            transition: var(--transition);
+            border: none;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+            box-shadow: 0 4px 12px rgba(26,111,196,0.25);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--secondary);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border);
+        }
+
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-family: 'Roboto Condensed', sans-serif;
+            font-size: 2.25rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .filters-bar {
+            display: flex;
+            gap: 1rem;
+            background: var(--card-bg);
+            padding: 1rem 1.5rem;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border);
+            margin-bottom: 1.5rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .filter-group label {
+            font-weight: 500;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .form-select {
+            padding: 0.5rem 2rem 0.5rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            outline: none;
+            background-color: #fff;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%2364748b' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 10px;
+        }
+
+        .form-select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(26,111,196,0.1);
+        }
+
+        .table-container {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border);
+            overflow-x: auto;
+            margin-bottom: 2rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            white-space: nowrap;
+        }
+
+        th, td {
+            padding: 1rem 1.5rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background-color: #f8fafc;
+            font-weight: 600;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            font-size: 0.95rem;
+            color: var(--text-dark);
+        }
+
+        tbody tr:hover {
+            background-color: #f1f5f9;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-success { background: #dcfce7; color: #166534; }
+        .badge-warning { background: #fef3c7; color: #92400e; }
+
+        .btn-view {
+            padding: 0.4rem 0.8rem;
+            background: #e0f2fe;
+            color: #0369a1;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .btn-view:hover {
+            background: #bae6fd;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            background: var(--card-bg);
+            border-top: 1px solid var(--border);
+        }
+
+        .page-info {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .page-controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .page-btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--border);
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            color: var(--text-dark);
+        }
+
+        .page-btn:hover:not(:disabled) {
+            background: #f1f5f9;
+        }
+
+        .page-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(255,255,255,0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            font-weight: 600;
+            color: var(--primary);
+            display: none;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="loading-overlay" id="loading">Loading data...</div>
+
+    <nav class="navbar">
+        <a href="admin-events.html" class="navbar-brand">Sindhu Runners</a>
+        <div class="nav-links">
+            <a href="admin-events.html">Events</a>
+            <a href="#" id="logoutBtn">Logout</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <div>
+                <a href="admin-events.html" style="color: var(--primary); text-decoration: none; font-size: 0.9rem; margin-bottom: 0.5rem; display: inline-block;">&larr; Back to Events</a>
+                <h1 class="page-title" id="eventTitle">Event Dashboard</h1>
+                <p class="page-subtitle">Real-time statistics and runner data</p>
+            </div>
+            <button class="btn btn-primary" id="downloadCsvBtn">
+                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                Export CSV
+            </button>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Total Runners (Paid)</div>
+                <div class="stat-value" id="statTotal">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Total Revenue</div>
+                <div class="stat-value" id="statRevenue">₹0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Gender (M/F)</div>
+                <div class="stat-value" style="font-size: 1.5rem; margin-top: 10px;" id="statGender">-</div>
+            </div>
+        </div>
+
+        <div class="filters-bar">
+            <div class="filter-group">
+                <label for="filterStatus">Status</label>
+                <select id="filterStatus" class="form-select">
+                    <option value="">All</option>
+                    <option value="PAID" selected>Success (Paid)</option>
+                    <option value="PENDING_PAYMENT">Pending</option>
+                    <option value="PAYMENT_FAILED">Failed</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="filterGender">Gender</label>
+                <select id="filterGender" class="form-select">
+                    <option value="">All</option>
+                    <option value="MALE">Male</option>
+                    <option value="FEMALE">Female</option>
+                    <option value="OTHER">Other</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="filterCategory">Category</label>
+                <select id="filterCategory" class="form-select">
+                    <option value="">All</option>
+                </select>
+            </div>
+            <button class="btn btn-outline" style="padding: 0.4rem 1rem;" id="applyFiltersBtn">Apply Filters</button>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Bib / Reg No</th>
+                        <th>Name</th>
+                        <th>Category</th>
+                        <th>Gender</th>
+                        <th>Age</th>
+                        <th>Status</th>
+                        <th>ID Document</th>
+                    </tr>
+                </thead>
+                <tbody id="runnersTableBody">
+                    <!-- Rows will be populated by JS -->
+                </tbody>
+            </table>
+            <div class="pagination">
+                <div class="page-info" id="pageInfo">Showing 0 of 0</div>
+                <div class="page-controls">
+                    <button class="page-btn" id="prevPageBtn" disabled>Previous</button>
+                    <button class="page-btn" id="nextPageBtn" disabled>Next</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost') && window.location.port !== '8080'
+            ? 'http://localhost:8080/api/v1'
+            : '/api/v1';
+
+        const token = localStorage.getItem('adminToken');
+        if (!token) {
+            window.location.href = 'admin-login.html';
+        }
+
+        // Get Event ID from URL params or localStorage fallback (for clean-url dev servers)
+        const urlParams = new URLSearchParams(window.location.search);
+        const eventId = urlParams.get('id') || localStorage.getItem('dashboardEventId');
+
+        if (!eventId) {
+            alert('No Event ID provided.');
+            window.location.href = 'admin-events.html';
+        }
+
+        let currentPage = 0;
+        const pageSize = 50;
+
+        document.getElementById('logoutBtn').addEventListener('click', (e) => {
+            e.preventDefault();
+            localStorage.removeItem('adminToken');
+            window.location.href = 'admin-login.html';
+        });
+
+        document.getElementById('applyFiltersBtn').addEventListener('click', () => {
+            currentPage = 0;
+            loadRegistrations();
+        });
+
+        document.getElementById('prevPageBtn').addEventListener('click', () => {
+            if (currentPage > 0) {
+                currentPage--;
+                loadRegistrations();
+            }
+        });
+
+        document.getElementById('nextPageBtn').addEventListener('click', () => {
+            currentPage++;
+            loadRegistrations();
+        });
+
+        document.getElementById('downloadCsvBtn').addEventListener('click', () => {
+            const status = document.getElementById('filterStatus').value;
+            const gender = document.getElementById('filterGender').value;
+            const categoryId = document.getElementById('filterCategory').value;
+            
+            let url = `${API_BASE}/admin/events/${eventId}/export?`;
+            if (status) url += `status=${status}&`;
+            if (gender) url += `gender=${gender}&`;
+            if (categoryId) url += `categoryId=${categoryId}&`;
+
+            // We need to fetch it with auth header and trigger download
+            fetch(url, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            })
+            .then(res => {
+                if(!res.ok) throw new Error("Failed to export data");
+                return res.blob();
+            })
+            .then(blob => {
+                const downloadUrl = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = downloadUrl;
+                a.download = `registrations_event_${eventId}.csv`;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(downloadUrl);
+            })
+            .catch(err => {
+                alert('Export failed: ' + err.message);
+            });
+        });
+
+        async function fetchWithAuth(url, options = {}) {
+            if (!options.headers) options.headers = {};
+            options.headers['Authorization'] = `Bearer ${token}`;
+            
+            const res = await fetch(url, options);
+            if (res.status === 401 || res.status === 403) {
+                localStorage.removeItem('adminToken');
+                window.location.href = 'admin-login.html';
+            }
+            return res;
+        }
+
+        async function loadDashboard() {
+            document.getElementById('loading').classList.add('active');
+            try {
+                // Load Event Details for Title and Categories
+                const eventRes = await fetchWithAuth(`${API_BASE}/admin/events/${eventId}`);
+                const eventData = await eventRes.json();
+                if(eventData.success) {
+                    document.getElementById('eventTitle').textContent = eventData.data.eventName + " Dashboard";
+                    
+                    const catSelect = document.getElementById('filterCategory');
+                    if(eventData.data.categories) {
+                        eventData.data.categories.forEach(c => {
+                            const opt = document.createElement('option');
+                            opt.value = c.id;
+                            opt.textContent = c.categoryName;
+                            catSelect.appendChild(opt);
+                        });
+                    }
+                }
+
+                // Load Stats
+                const statsRes = await fetchWithAuth(`${API_BASE}/admin/events/${eventId}/stats`);
+                const statsData = await statsRes.json();
+                if(statsData.success) {
+                    const d = statsData.data;
+                    document.getElementById('statTotal').textContent = d.totalRegistrations;
+                    document.getElementById('statRevenue').textContent = '₹' + d.totalRevenue;
+                    
+                    let genderStr = [];
+                    if(d.genderBreakdown['MALE']) genderStr.push(`M: ${d.genderBreakdown['MALE']}`);
+                    if(d.genderBreakdown['FEMALE']) genderStr.push(`F: ${d.genderBreakdown['FEMALE']}`);
+                    document.getElementById('statGender').textContent = genderStr.join(' | ') || '-';
+                }
+
+                // Load Registrations
+                await loadRegistrations();
+
+            } catch (err) {
+                console.error(err);
+                alert("Failed to load dashboard data");
+            } finally {
+                document.getElementById('loading').classList.remove('active');
+            }
+        }
+
+        async function loadRegistrations() {
+            const status = document.getElementById('filterStatus').value;
+            const gender = document.getElementById('filterGender').value;
+            const categoryId = document.getElementById('filterCategory').value;
+            
+            let url = `${API_BASE}/admin/events/${eventId}/registrations?page=${currentPage}&size=${pageSize}`;
+            if (status) url += `&status=${status}`;
+            if (gender) url += `&gender=${gender}`;
+            if (categoryId) url += `&categoryId=${categoryId}`;
+
+            try {
+                const res = await fetchWithAuth(url);
+                const data = await res.json();
+                
+                if (data.success) {
+                    renderTable(data.data);
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        function renderTable(pageData) {
+            const tbody = document.getElementById('runnersTableBody');
+            tbody.innerHTML = '';
+
+            if (pageData.content.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #64748b;">No registrations found matching the filters.</td></tr>';
+            } else {
+                pageData.content.forEach(r => {
+                    const statusClass = r.status === 'PAID' ? 'badge-success' : 'badge-warning';
+                    
+                    let idBtn = '';
+                    if (r.documentUrl) {
+                        idBtn = `<a href="${r.documentUrl}" target="_blank" class="btn-view">View ID</a>`;
+                    } else {
+                        idBtn = `<span style="color: #94a3b8; font-size: 0.85rem;">No ID</span>`;
+                    }
+
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td><strong>${r.registrationNumber || '-'}</strong></td>
+                        <td>${r.fullName}</td>
+                        <td>${r.categoryName}</td>
+                        <td>${r.gender}</td>
+                        <td>${r.calculatedAge}</td>
+                        <td><span class="badge ${statusClass}">${r.status}</span></td>
+                        <td>${idBtn}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+
+            // Update Pagination
+            document.getElementById('pageInfo').textContent = `Showing page ${pageData.number + 1} of ${pageData.totalPages || 1} (Total: ${pageData.totalElements})`;
+            
+            document.getElementById('prevPageBtn').disabled = pageData.first;
+            document.getElementById('nextPageBtn').disabled = pageData.last;
+        }
+
+        // Init
+        loadDashboard();
+
+    </script>
+</body>
+</html>

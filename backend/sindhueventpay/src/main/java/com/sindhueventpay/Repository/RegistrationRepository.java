@@ -19,7 +19,9 @@ import java.util.Optional;
  * row during payment processing to prevent concurrent modifications (e.g., webhook
  * and frontend callback racing to mark the same registration PAID).
  */
-public interface RegistrationRepository extends JpaRepository<Registration, String> {
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+
+public interface RegistrationRepository extends JpaRepository<Registration, String>, JpaSpecificationExecutor<Registration> {
 
     /**
      * Find registration by Razorpay order ID.
@@ -43,4 +45,13 @@ public interface RegistrationRepository extends JpaRepository<Registration, Stri
 
     /** Count PAID registrations for an event (admin dashboard). */
     long countByEventIdAndStatus(Long eventId, RegistrationStatus status);
+
+    @Query("SELECT SUM(r.calculatedFee) FROM Registration r WHERE r.eventId = :eventId AND r.status = :status")
+    java.math.BigDecimal sumCalculatedFeeByEventIdAndStatus(@Param("eventId") Long eventId, @Param("status") RegistrationStatus status);
+
+    @Query("SELECT r.categoryId, COUNT(r) FROM Registration r WHERE r.eventId = :eventId AND r.status = :status GROUP BY r.categoryId")
+    java.util.List<Object[]> countByEventIdAndStatusGroupByCategoryId(@Param("eventId") Long eventId, @Param("status") RegistrationStatus status);
+
+    @Query("SELECT r.gender, COUNT(r) FROM Registration r WHERE r.eventId = :eventId AND r.status = :status GROUP BY r.gender")
+    java.util.List<Object[]> countByEventIdAndStatusGroupByGender(@Param("eventId") Long eventId, @Param("status") RegistrationStatus status);
 }

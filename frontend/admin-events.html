@@ -215,7 +215,7 @@
             background: #fff;
         }
 
-        .btn-edit, .btn-delete {
+        .btn-edit, .btn-delete, .btn-dashboard {
             flex: 1;
             padding: 8px;
             text-align: center;
@@ -226,6 +226,16 @@
             text-decoration: none;
             transition: all var(--transition);
         }
+        
+        .btn-dashboard {
+            background: #eaf9ef;
+            color: #1e7e34;
+            border: 1px solid #b2dfcc;
+        }
+        .btn-dashboard:hover {
+            background: #d4f3e1;
+        }
+
         .btn-edit {
             background: var(--primary-light);
             color: var(--primary-dark);
@@ -384,6 +394,7 @@
                             </div>
                         </div>
                         <div class="card-footer">
+                            <a href="admin-event-dashboard.html?id=${ev.id}" class="btn-dashboard" onclick="localStorage.setItem('dashboardEventId', '${ev.id}')">Dashboard</a>
                             <a href="admin-update-event.html?id=${ev.id}" class="btn-edit" onclick="localStorage.setItem('editEventId', '${ev.id}')">Edit</a>
                             ${ev.active ? `<button class="btn-delete" onclick="disableEvent(${ev.id}, '${ev.eventName}')">Disable</button>` : `<button class="btn-delete" disabled style="opacity: 0.5; cursor: not-allowed">Disabled</button>`}
                         </div>

@@ -18,6 +18,7 @@ import java.util.List;
 public class AdminEventController {
 
     private final AdminEventService adminEventService;
+    private final com.sindhueventpay.services.AdminDashboardService adminDashboardService;
 
     @PostMapping
     public ResponseEntity<ApiResponse<AdminEventResponse>> createEvent(
@@ -50,5 +51,45 @@ public class AdminEventController {
     public ResponseEntity<ApiResponse<Void>> deleteEvent(@PathVariable Long id) {
         adminEventService.deleteEvent(id);
         return ResponseEntity.ok(ApiResponse.success(null));
+    }
+
+    @GetMapping("/{id}/stats")
+    public ResponseEntity<ApiResponse<com.sindhueventpay.dto.RegistrationStatsResponse>> getEventStats(@PathVariable Long id) {
+        return ResponseEntity.ok(ApiResponse.success(adminDashboardService.getEventStats(id)));
+    }
+
+    @GetMapping("/{id}/registrations")
+    public ResponseEntity<ApiResponse<org.springframework.data.domain.Page<com.sindhueventpay.dto.AdminRegistrationResponse>>> getRegistrations(
+            @PathVariable Long id,
+            @RequestParam(required = false) String gender,
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) com.sindhueventpay.enums.RegistrationStatus status,
+            org.springframework.data.domain.Pageable pageable) {
+        return ResponseEntity.ok(ApiResponse.success(adminDashboardService.getRegistrations(id, gender, categoryId, status, pageable)));
+    }
+
+    @GetMapping("/{id}/export")
+    public ResponseEntity<byte[]> exportRegistrationsCsv(
+            @PathVariable Long id,
+            @RequestParam(required = false) String gender,
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) com.sindhueventpay.enums.RegistrationStatus status) {
+        
+        String csvData = adminDashboardService.generateCsvExport(id, gender, categoryId, status);
+        byte[] csvBytes = csvData.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        
+        // Add UTF-8 BOM so Excel opens it correctly without mangling characters
+        byte[] bom = new byte[] { (byte) 0xEF, (byte) 0xBB, (byte) 0xBF };
+        byte[] finalBytes = new byte[bom.length + csvBytes.length];
+        System.arraycopy(bom, 0, finalBytes, 0, bom.length);
+        System.arraycopy(csvBytes, 0, finalBytes, bom.length, csvBytes.length);
+
+        org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+        headers.set(org.springframework.http.HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=registrations_event_" + id + ".csv");
+        headers.set(org.springframework.http.HttpHeaders.CONTENT_TYPE, "text/csv; charset=UTF-8");
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(finalBytes);
     }
 }
