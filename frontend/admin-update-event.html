@@ -293,7 +293,10 @@
             <h1>Sindhu Runners</h1>
             <p>Admin Dashboard</p>
         </div>
-        <a href="admin-events.html" class="back-link">← Back to Events</a>
+        <div style="display: flex; gap: 16px; align-items: center;">
+            <a href="admin-events.html" class="back-link">← Back to Events</a>
+            <a href="#" class="back-link" style="color: var(--danger);" onclick="logout()">Logout</a>
+        </div>
     </header>
 
     <div class="page-wrapper">
@@ -368,6 +371,16 @@
 
         const $ = id => document.getElementById(id);
 
+        const token = localStorage.getItem('adminToken');
+        if (!token) {
+            window.location.href = 'admin-login.html';
+        }
+
+        function logout() {
+            localStorage.removeItem('adminToken');
+            window.location.href = 'admin-login.html';
+        }
+
         const params = new URLSearchParams(window.location.search);
         const eventId = params.get('id') || localStorage.getItem('editEventId');
 
@@ -427,7 +440,15 @@
             }
 
             try {
-                const res = await fetch(`${API_BASE}/events/${eventId}`);
+                const res = await fetch(`${API_BASE}/events/${eventId}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (res.status === 401 || res.status === 403) {
+                    logout();
+                    return;
+                }
+
                 const json = await res.json();
                 
                 if (!res.ok || !json.success) {
@@ -522,9 +543,17 @@
             try {
                 const response = await fetch(`${API_BASE}/events/${eventId}`, {
                     method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}` 
+                    },
                     body: JSON.stringify(payload)
                 });
+
+                if (response.status === 401 || response.status === 403) {
+                    logout();
+                    return;
+                }
 
                 const data = await response.json();
 

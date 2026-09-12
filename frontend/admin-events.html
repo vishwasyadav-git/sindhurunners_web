@@ -274,7 +274,10 @@
             <h1>Sindhu Runners</h1>
             <p>Admin Dashboard</p>
         </div>
-        <a href="index.html" class="back-link">← Back to Home</a>
+        <div style="display: flex; gap: 16px; align-items: center;">
+            <a href="index.html" class="back-link">← Back to Home</a>
+            <a href="#" class="back-link" style="color: var(--danger);" onclick="logout()">Logout</a>
+        </div>
     </header>
 
     <div class="page-wrapper">
@@ -302,6 +305,16 @@
 
         const $ = id => document.getElementById(id);
 
+        const token = localStorage.getItem('adminToken');
+        if (!token) {
+            window.location.href = 'admin-login.html';
+        }
+
+        function logout() {
+            localStorage.removeItem('adminToken');
+            window.location.href = 'admin-login.html';
+        }
+
         function showAlert(msg, isSuccess = false) {
             const el = isSuccess ? $('successAlert') : $('globalAlert');
             const other = isSuccess ? $('globalAlert') : $('successAlert');
@@ -314,7 +327,15 @@
         async function loadEvents() {
             const grid = $('eventsGrid');
             try {
-                const res = await fetch(`${API_BASE}/events`);
+                const res = await fetch(`${API_BASE}/events`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (res.status === 401 || res.status === 403) {
+                    logout();
+                    return;
+                }
+
                 const json = await res.json();
                 
                 if (!res.ok || !json.success) {
@@ -379,7 +400,16 @@
             if (!confirm(`Are you sure you want to disable "${name}"? Registrations will be closed.`)) return;
             
             try {
-                const res = await fetch(`${API_BASE}/events/${id}`, { method: 'DELETE' });
+                const res = await fetch(`${API_BASE}/events/${id}`, { 
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (res.status === 401 || res.status === 403) {
+                    logout();
+                    return;
+                }
+
                 const json = await res.json();
                 
                 if (!res.ok || !json.success) {
