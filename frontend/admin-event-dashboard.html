@@ -4,424 +4,213 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Event Dashboard — Sindhu Runners Admin</title>
+
+    <!-- Tailwind CSS, Feather Icons, AOS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <link rel="icon" type="image/x-icon" href="/images/SindhuRunnerLogo02-04.png">
+
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;500;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
     <style>
-        :root {
-            --primary: #1a6fc4;
-            --primary-dark: #134fa3;
-            --secondary: #eef2f6;
-            --success: #2e7d32;
-            --warning: #f57c00;
-            --danger: #d32f2f;
-            --text-dark: #1e293b;
-            --text-muted: #64748b;
-            --border: #e2e8f0;
-            --bg: #f8fafc;
-            --card-bg: #ffffff;
-            --radius: 12px;
-            --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
-            --shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
-            --transition: all 0.2s ease;
-        }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', sans-serif; }
+        .font-condensed { font-family: 'Roboto Condensed', sans-serif; }
         
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg);
-            color: var(--text-dark);
-            line-height: 1.5;
-        }
-
-        .navbar {
-            background: var(--card-bg);
-            padding: 1rem 2rem;
-            box-shadow: var(--shadow-sm);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .navbar-brand {
-            font-family: 'Roboto Condensed', sans-serif;
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--primary);
-            text-decoration: none;
-        }
-
-        .nav-links a {
-            color: var(--text-muted);
-            text-decoration: none;
-            margin-left: 1.5rem;
-            font-weight: 500;
-            transition: var(--transition);
-        }
-
-        .nav-links a:hover { color: var(--primary); }
-
-        .container {
-            max-width: 1200px;
-            margin: 2rem auto;
-            padding: 0 1.5rem;
-        }
-
-        .page-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            margin-bottom: 2rem;
-        }
-
-        .page-title {
-            font-family: 'Roboto Condensed', sans-serif;
-            font-size: 2rem;
-            color: var(--text-dark);
-        }
-        
-        .page-subtitle {
-            color: var(--text-muted);
-            font-size: 1rem;
-            margin-top: 0.25rem;
-        }
-
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.75rem 1.25rem;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 0.95rem;
-            cursor: pointer;
-            text-decoration: none;
-            transition: var(--transition);
-            border: none;
-        }
-
-        .btn-primary {
-            background-color: var(--primary);
-            color: white;
-            box-shadow: 0 4px 12px rgba(26,111,196,0.25);
-        }
-
-        .btn-primary:hover {
-            background-color: var(--primary-dark);
-            transform: translateY(-1px);
-        }
-
-        .btn-outline {
-            background-color: transparent;
-            color: var(--primary);
-            border: 1px solid var(--primary);
-        }
-
-        .btn-outline:hover {
-            background-color: var(--secondary);
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .stat-card {
-            background: var(--card-bg);
-            padding: 1.5rem;
-            border-radius: var(--radius);
-            box-shadow: var(--shadow-sm);
-            border: 1px solid var(--border);
-        }
-
-        .stat-label {
-            color: var(--text-muted);
-            font-size: 0.9rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 0.5rem;
-        }
-
-        .stat-value {
-            font-family: 'Roboto Condensed', sans-serif;
-            font-size: 2.25rem;
-            font-weight: 700;
-            color: var(--primary);
-        }
-
-        .filters-bar {
-            display: flex;
-            gap: 1rem;
-            background: var(--card-bg);
-            padding: 1rem 1.5rem;
-            border-radius: var(--radius);
-            box-shadow: var(--shadow-sm);
-            border: 1px solid var(--border);
-            margin-bottom: 1.5rem;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        .filter-group {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .filter-group label {
-            font-weight: 500;
-            color: var(--text-muted);
-            font-size: 0.9rem;
-        }
-
-        .form-select {
-            padding: 0.5rem 2rem 0.5rem 1rem;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            font-family: inherit;
-            font-size: 0.95rem;
-            outline: none;
-            background-color: #fff;
-            appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%2364748b' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 0.75rem center;
-            background-size: 10px;
-        }
-
-        .form-select:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(26,111,196,0.1);
-        }
-
-        .table-container {
-            background: var(--card-bg);
-            border-radius: var(--radius);
-            box-shadow: var(--shadow-sm);
-            border: 1px solid var(--border);
-            overflow-x: auto;
-            margin-bottom: 2rem;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            white-space: nowrap;
-        }
-
-        th, td {
-            padding: 1rem 1.5rem;
-            text-align: left;
-            border-bottom: 1px solid var(--border);
-        }
-
-        th {
-            background-color: #f8fafc;
-            font-weight: 600;
-            color: var(--text-muted);
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        td {
-            font-size: 0.95rem;
-            color: var(--text-dark);
-        }
-
-        tbody tr:hover {
-            background-color: #f1f5f9;
-        }
-
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            padding: 0.25rem 0.75rem;
-            border-radius: 9999px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-
-        .badge-success { background: #dcfce7; color: #166534; }
-        .badge-warning { background: #fef3c7; color: #92400e; }
-
-        .btn-view {
-            padding: 0.4rem 0.8rem;
-            background: #e0f2fe;
-            color: #0369a1;
-            border: none;
-            border-radius: 4px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            cursor: pointer;
-            text-decoration: none;
-            transition: var(--transition);
-        }
-
-        .btn-view:hover {
-            background: #bae6fd;
-        }
-
-        .pagination {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem 1.5rem;
-            background: var(--card-bg);
-            border-top: 1px solid var(--border);
-        }
-
-        .page-info {
-            color: var(--text-muted);
-            font-size: 0.9rem;
-        }
-
-        .page-controls {
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .page-btn {
-            padding: 0.5rem 1rem;
-            border: 1px solid var(--border);
-            background: white;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 500;
-            color: var(--text-dark);
-        }
-
-        .page-btn:hover:not(:disabled) {
-            background: #f1f5f9;
-        }
-
-        .page-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .loading-overlay {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(255,255,255,0.8);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            font-weight: 600;
-            color: var(--primary);
-            display: none;
-        }
-
-        .loading-overlay.active {
-            display: flex;
-        }
+        /* Custom scrollbar for table */
+        .table-scrollbar::-webkit-scrollbar { height: 8px; width: 8px; }
+        .table-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
+        .table-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .table-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     </style>
 </head>
-<body>
+<body class="bg-gray-50 text-gray-800 min-h-screen">
 
-    <div class="loading-overlay" id="loading">Loading data...</div>
+    <!-- Loading Overlay -->
+    <div id="loading" class="fixed inset-0 bg-white/90 backdrop-blur-sm z-[1000] hidden items-center justify-center flex-col">
+        <i data-feather="loader" class="animate-spin w-10 h-10 text-indigo-600 mb-4"></i>
+        <p class="text-indigo-900 font-bold tracking-wider uppercase text-sm">Loading Data...</p>
+    </div>
 
-    <nav class="navbar">
-        <a href="admin-events.html" class="navbar-brand">Sindhu Runners</a>
-        <div class="nav-links">
-            <a href="admin-events.html">Events</a>
-            <a href="#" id="logoutBtn">Logout</a>
-        </div>
-    </nav>
-
-    <div class="container">
-        <div class="page-header">
-            <div>
-                <a href="admin-events.html" style="color: var(--primary); text-decoration: none; font-size: 0.9rem; margin-bottom: 0.5rem; display: inline-block;">&larr; Back to Events</a>
-                <h1 class="page-title" id="eventTitle">Event Dashboard</h1>
-                <p class="page-subtitle">Real-time statistics and runner data</p>
-            </div>
-            <button class="btn btn-primary" id="downloadCsvBtn">
-                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                Export CSV
-            </button>
-        </div>
-
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-label">Total Runners (Paid)</div>
-                <div class="stat-value" id="statTotal">0</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">Total Revenue</div>
-                <div class="stat-value" id="statRevenue">₹0</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">Gender (M/F)</div>
-                <div class="stat-value" style="font-size: 1.5rem; margin-top: 10px;" id="statGender">-</div>
-            </div>
-        </div>
-
-        <div class="filters-bar">
-            <div class="filter-group">
-                <label for="filterStatus">Status</label>
-                <select id="filterStatus" class="form-select">
-                    <option value="">All</option>
-                    <option value="PAID" selected>Success (Paid)</option>
-                    <option value="PENDING_PAYMENT">Pending</option>
-                    <option value="PAYMENT_FAILED">Failed</option>
-                </select>
-            </div>
-            <div class="filter-group">
-                <label for="filterGender">Gender</label>
-                <select id="filterGender" class="form-select">
-                    <option value="">All</option>
-                    <option value="MALE">Male</option>
-                    <option value="FEMALE">Female</option>
-                    <option value="OTHER">Other</option>
-                </select>
-            </div>
-            <div class="filter-group">
-                <label for="filterCategory">Category</label>
-                <select id="filterCategory" class="form-select">
-                    <option value="">All</option>
-                </select>
-            </div>
-            <button class="btn btn-outline" style="padding: 0.4rem 1rem;" id="applyFiltersBtn">Apply Filters</button>
-        </div>
-
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Bib / Reg No</th>
-                        <th>Name</th>
-                        <th>Category</th>
-                        <th>Gender</th>
-                        <th>Age</th>
-                        <th>Status</th>
-                        <th>ID Document</th>
-                    </tr>
-                </thead>
-                <tbody id="runnersTableBody">
-                    <!-- Rows will be populated by JS -->
-                </tbody>
-            </table>
-            <div class="pagination">
-                <div class="page-info" id="pageInfo">Showing 0 of 0</div>
-                <div class="page-controls">
-                    <button class="page-btn" id="prevPageBtn" disabled>Previous</button>
-                    <button class="page-btn" id="nextPageBtn" disabled>Next</button>
+    <!-- Navigation -->
+    <nav class="bg-[#0A3D62] shadow-lg sticky top-0 w-full z-50">
+        <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <img src="images/SindhuRunnerLogo02-04.png" alt="Logo" class="h-10 w-10 mr-2 rounded-full">
+                    <span class="text-xl font-bold text-white font-condensed tracking-wide">ADMIN PORTAL</span>
+                </div>
+                <div class="flex items-center space-x-6">
+                    <a href="admin-events.html" class="text-white hover:text-gray-300 font-medium text-sm flex items-center transition">
+                        <i data-feather="grid" class="w-4 h-4 mr-1"></i> Events
+                    </a>
+                    <button id="logoutBtn" class="bg-red-500 hover:bg-red-600 text-white px-4 py-1.5 rounded-full text-sm font-semibold transition flex items-center shadow-sm">
+                        <i data-feather="log-out" class="w-4 h-4 mr-1"></i> Logout
+                    </button>
                 </div>
             </div>
         </div>
-    </div>
+    </nav>
+
+    <main class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4" data-aos="fade-down">
+            <div>
+                <a href="admin-events.html" class="inline-flex items-center text-indigo-600 hover:text-indigo-800 text-sm font-semibold mb-2 transition">
+                    <i data-feather="arrow-left" class="w-4 h-4 mr-1"></i> Back to Events
+                </a>
+                <h1 id="eventTitle" class="text-3xl font-bold text-gray-900 font-condensed tracking-wide">Event Dashboard</h1>
+                <p class="text-gray-500 mt-1">Real-time statistics and runner data</p>
+            </div>
+            <button id="downloadCsvBtn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 px-6 rounded-lg shadow-md hover:shadow-lg transition flex items-center shrink-0">
+                <i data-feather="download" class="w-5 h-5 mr-2"></i> Export CSV
+            </button>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8" data-aos="fade-up" data-aos-delay="100">
+            <!-- Stat 1 -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex items-center relative overflow-hidden">
+                <div class="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-indigo-50 to-transparent opacity-50"></div>
+                <div class="w-14 h-14 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 mr-5 shrink-0">
+                    <i data-feather="users" class="w-7 h-7"></i>
+                </div>
+                <div>
+                    <p class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Total Runners (Paid)</p>
+                    <h3 id="statTotal" class="text-3xl font-condensed font-bold text-gray-900">0</h3>
+                </div>
+            </div>
+            <!-- Stat 2 -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex items-center relative overflow-hidden">
+                <div class="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-green-50 to-transparent opacity-50"></div>
+                <div class="w-14 h-14 rounded-full bg-green-100 flex items-center justify-center text-green-600 mr-5 shrink-0">
+                    <i data-feather="dollar-sign" class="w-7 h-7"></i>
+                </div>
+                <div>
+                    <p class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Total Revenue</p>
+                    <h3 id="statRevenue" class="text-3xl font-condensed font-bold text-gray-900">₹0</h3>
+                </div>
+            </div>
+            <!-- Stat 3 -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex items-center relative overflow-hidden">
+                <div class="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-purple-50 to-transparent opacity-50"></div>
+                <div class="w-14 h-14 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 mr-5 shrink-0">
+                    <i data-feather="pie-chart" class="w-7 h-7"></i>
+                </div>
+                <div>
+                    <p class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Gender (M/F)</p>
+                    <h3 id="statGender" class="text-xl font-bold text-gray-900 mt-2">-</h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 mb-8" data-aos="fade-up" data-aos-delay="200">
+            <div class="flex flex-wrap items-end gap-5">
+                <div class="flex-grow min-w-[200px]">
+                    <label for="filterStatus" class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-2">Status</label>
+                    <div class="relative">
+                        <select id="filterStatus" class="appearance-none w-full bg-gray-50 border border-gray-300 text-gray-700 py-2.5 px-4 pr-8 rounded-lg leading-tight focus:outline-none focus:bg-white focus:border-indigo-500 transition shadow-sm font-medium">
+                            <option value="">All Statuses</option>
+                            <option value="PAID" selected>Success (Paid)</option>
+                            <option value="PENDING_PAYMENT">Pending</option>
+                            <option value="PAYMENT_FAILED">Failed</option>
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
+                            <i data-feather="chevron-down" class="w-4 h-4"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex-grow min-w-[150px]">
+                    <label for="filterGender" class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-2">Gender</label>
+                    <div class="relative">
+                        <select id="filterGender" class="appearance-none w-full bg-gray-50 border border-gray-300 text-gray-700 py-2.5 px-4 pr-8 rounded-lg leading-tight focus:outline-none focus:bg-white focus:border-indigo-500 transition shadow-sm font-medium">
+                            <option value="">All Genders</option>
+                            <option value="MALE">Male</option>
+                            <option value="FEMALE">Female</option>
+                            <option value="OTHER">Other</option>
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
+                            <i data-feather="chevron-down" class="w-4 h-4"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex-grow min-w-[200px]">
+                    <label for="filterCategory" class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-2">Category</label>
+                    <div class="relative">
+                        <select id="filterCategory" class="appearance-none w-full bg-gray-50 border border-gray-300 text-gray-700 py-2.5 px-4 pr-8 rounded-lg leading-tight focus:outline-none focus:bg-white focus:border-indigo-500 transition shadow-sm font-medium">
+                            <option value="">All Categories</option>
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
+                            <i data-feather="chevron-down" class="w-4 h-4"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <button id="applyFiltersBtn" class="bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-600 hover:text-white font-bold py-2.5 px-6 rounded-lg transition shadow-sm h-full w-full whitespace-nowrap">
+                        Apply Filters
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Table -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden" data-aos="fade-up" data-aos-delay="300">
+            <div class="overflow-x-auto table-scrollbar">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap">Bib / Reg No</th>
+                            <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap">Name</th>
+                            <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap">Category</th>
+                            <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap">Gender</th>
+                            <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap">Age</th>
+                            <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap">Status</th>
+                            <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap">ID Document</th>
+                        </tr>
+                    </thead>
+                    <tbody id="runnersTableBody" class="bg-white divide-y divide-gray-100">
+                        <!-- Rows populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Pagination -->
+            <div class="bg-gray-50 px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+                <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                    <div>
+                        <p class="text-sm text-gray-700" id="pageInfo">
+                            Showing <span class="font-semibold">0</span> of <span class="font-semibold">0</span>
+                        </p>
+                    </div>
+                    <div>
+                        <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                            <button id="prevPageBtn" disabled class="relative inline-flex items-center px-4 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition">
+                                Previous
+                            </button>
+                            <button id="nextPageBtn" disabled class="relative inline-flex items-center px-4 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition">
+                                Next
+                            </button>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
 
     <script>
+        feather.replace();
+        AOS.init({ once: true });
+
         const API_BASE = (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost') && window.location.port !== '8080'
             ? 'http://localhost:8080/api/v1'
             : '/api/v1';
@@ -476,6 +265,13 @@
             if (gender) url += `gender=${gender}&`;
             if (categoryId) url += `categoryId=${categoryId}&`;
 
+            // Trigger loading state visually for button
+            const btn = document.getElementById('downloadCsvBtn');
+            const originalHtml = btn.innerHTML;
+            btn.innerHTML = '<i data-feather="loader" class="animate-spin w-5 h-5 mr-2"></i> Exporting...';
+            feather.replace();
+            btn.disabled = true;
+
             // We need to fetch it with auth header and trigger download
             fetch(url, {
                 headers: { 'Authorization': `Bearer ${token}` }
@@ -496,6 +292,11 @@
             })
             .catch(err => {
                 alert('Export failed: ' + err.message);
+            })
+            .finally(() => {
+                btn.innerHTML = originalHtml;
+                feather.replace();
+                btn.disabled = false;
             });
         });
 
@@ -512,7 +313,10 @@
         }
 
         async function loadDashboard() {
-            document.getElementById('loading').classList.add('active');
+            const loading = document.getElementById('loading');
+            loading.classList.remove('hidden');
+            loading.classList.add('flex');
+            
             try {
                 // Load Event Details for Title and Categories
                 const eventRes = await fetchWithAuth(`${API_BASE}/admin/events/${eventId}`);
@@ -537,7 +341,7 @@
                 if(statsData.success) {
                     const d = statsData.data;
                     document.getElementById('statTotal').textContent = d.totalRegistrations;
-                    document.getElementById('statRevenue').textContent = '₹' + d.totalRevenue;
+                    document.getElementById('statRevenue').textContent = '₹' + d.totalRevenue.toLocaleString('en-IN');
                     
                     let genderStr = [];
                     if(d.genderBreakdown['MALE']) genderStr.push(`M: ${d.genderBreakdown['MALE']}`);
@@ -552,7 +356,8 @@
                 console.error(err);
                 alert("Failed to load dashboard data");
             } finally {
-                document.getElementById('loading').classList.remove('active');
+                loading.classList.remove('flex');
+                loading.classList.add('hidden');
             }
         }
 
@@ -583,34 +388,52 @@
             tbody.innerHTML = '';
 
             if (pageData.content.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #64748b;">No registrations found matching the filters.</td></tr>';
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="px-6 py-12 text-center text-gray-500 bg-gray-50">
+                            <i data-feather="inbox" class="w-10 h-10 mx-auto text-gray-400 mb-3"></i>
+                            <p class="font-medium text-lg text-gray-600">No registrations found</p>
+                            <p class="text-sm">Try adjusting your filters to see more results.</p>
+                        </td>
+                    </tr>
+                `;
+                feather.replace();
             } else {
                 pageData.content.forEach(r => {
-                    const statusClass = r.status === 'PAID' ? 'badge-success' : 'badge-warning';
+                    let statusHtml = '';
+                    if(r.status === 'PAID') {
+                        statusHtml = `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-green-100 text-green-800 border border-green-200">PAID</span>`;
+                    } else if (r.status === 'PENDING_PAYMENT') {
+                        statusHtml = `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-yellow-100 text-yellow-800 border border-yellow-200">PENDING</span>`;
+                    } else {
+                        statusHtml = `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-800 border border-red-200">${r.status}</span>`;
+                    }
                     
                     let idBtn = '';
                     if (r.documentUrl) {
-                        idBtn = `<a href="${r.documentUrl}" target="_blank" class="btn-view">View ID</a>`;
+                        idBtn = `<a href="${r.documentUrl}" target="_blank" class="inline-flex items-center px-3 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold rounded transition"><i data-feather="file" class="w-3 h-3 mr-1"></i> View ID</a>`;
                     } else {
-                        idBtn = `<span style="color: #94a3b8; font-size: 0.85rem;">No ID</span>`;
+                        idBtn = `<span class="text-gray-400 text-xs font-medium italic">No ID provided</span>`;
                     }
 
                     const tr = document.createElement('tr');
+                    tr.className = "hover:bg-gray-50 transition";
                     tr.innerHTML = `
-                        <td><strong>${r.registrationNumber || '-'}</strong></td>
-                        <td>${r.fullName}</td>
-                        <td>${r.categoryName}</td>
-                        <td>${r.gender}</td>
-                        <td>${r.calculatedAge}</td>
-                        <td><span class="badge ${statusClass}">${r.status}</span></td>
-                        <td>${idBtn}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-indigo-600 font-mono">${r.registrationNumber || '-'}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${r.fullName}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600"><span class="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs font-semibold">${r.categoryName}</span></td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${r.gender}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-mono">${r.calculatedAge}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">${statusHtml}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">${idBtn}</td>
                     `;
                     tbody.appendChild(tr);
                 });
+                feather.replace();
             }
 
             // Update Pagination
-            document.getElementById('pageInfo').textContent = `Showing page ${pageData.number + 1} of ${pageData.totalPages || 1} (Total: ${pageData.totalElements})`;
+            document.getElementById('pageInfo').innerHTML = `Showing page <span class="font-bold">${pageData.number + 1}</span> of <span class="font-bold">${pageData.totalPages || 1}</span> (Total: ${pageData.totalElements})`;
             
             document.getElementById('prevPageBtn').disabled = pageData.first;
             document.getElementById('nextPageBtn').disabled = pageData.last;

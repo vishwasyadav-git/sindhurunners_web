@@ -5,184 +5,92 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Login — Sindhu Runners</title>
     
+    <!-- Tailwind CSS, Feather Icons -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <link rel="icon" type="image/x-icon" href="/images/SindhuRunnerLogo02-04.png">
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;500;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     
     <style>
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        
-        :root {
-            --primary:       #1a6fc4;
-            --primary-dark:  #134fa3;
-            --danger:        #e74c3c;
-            --text:          #1c2333;
-            --text-muted:    #5a6478;
-            --border:        #d4dce8;
-            --bg-grad-start: #b8d9f0;
-            --bg-grad-mid:   #aee6d8;
-            --bg-grad-end:   #add8e6;
-            --card-bg:       rgba(255,255,255,0.92);
-            --radius:        16px;
-            --radius-sm:     8px;
-            --transition:    0.22s ease;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(160deg, var(--bg-grad-start) 0%, var(--bg-grad-mid) 50%, var(--bg-grad-end) 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .login-card {
-            background: var(--card-bg);
-            border-radius: var(--radius);
-            box-shadow: 0 8px 40px rgba(26,111,196,0.13), 0 2px 10px rgba(0,0,0,0.07);
-            backdrop-filter: blur(6px);
-            border: 1px solid rgba(255,255,255,0.6);
-            width: 100%;
-            max-width: 400px;
-            padding: 40px;
-        }
-
-        .logo-container {
-            text-align: center;
-            margin-bottom: 24px;
-        }
-        
-        .logo-container h1 {
-            font-family: 'Roboto Condensed', sans-serif;
-            font-size: 1.8rem;
-            color: var(--primary-dark);
-            margin-bottom: 4px;
-        }
-
-        .logo-container p {
-            color: var(--text-muted);
-            font-size: 0.9rem;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-label {
-            display: block;
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: var(--text-muted);
-            margin-bottom: 6px;
-            text-transform: uppercase;
-        }
-
-        .form-input {
-            width: 100%;
-            padding: 12px;
-            border: 1.5px solid var(--border);
-            border-radius: var(--radius-sm);
-            font-size: 1rem;
-            font-family: 'Inter', sans-serif;
-            outline: none;
-            transition: all var(--transition);
-        }
-        
-        .form-input:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(26,111,196,0.12);
-        }
-
-        .btn-login {
-            width: 100%;
-            padding: 14px;
-            background: linear-gradient(135deg, var(--primary) 0%, #1a8fc4 100%);
-            color: #fff;
-            border: none;
-            border-radius: var(--radius-sm);
-            font-size: 1.05rem;
-            font-family: 'Roboto Condensed', sans-serif;
-            font-weight: 700;
-            letter-spacing: 0.8px;
-            cursor: pointer;
-            transition: all var(--transition);
-            margin-top: 10px;
-        }
-
-        .btn-login:hover:not(:disabled) {
-            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(26,111,196,0.35);
-        }
-        
-        .btn-login:disabled {
-            opacity: 0.7;
-            cursor: not-allowed;
-        }
-
-        .alert {
-            padding: 12px;
-            border-radius: var(--radius-sm);
-            font-size: 0.88rem;
-            margin-bottom: 20px;
-            display: none;
-            text-align: center;
-        }
-        
-        .alert.visible {
-            display: block;
-        }
-        
-        .alert-error {
-            background: #fdf0ee;
-            border: 1px solid #f5c6c0;
-            color: #922b21;
-        }
-
-        .back-link {
-            display: block;
-            text-align: center;
-            margin-top: 24px;
-            font-size: 0.85rem;
-            color: var(--primary);
-            text-decoration: none;
-            font-weight: 500;
-        }
-        
-        .back-link:hover {
-            text-decoration: underline;
-        }
+        body { font-family: 'Inter', sans-serif; }
+        .font-condensed { font-family: 'Roboto Condensed', sans-serif; }
     </style>
 </head>
-<body>
-    <div class="login-card">
-        <div class="logo-container">
-            <h1>Sindhu Runners</h1>
-            <p>Admin Login</p>
+<body class="bg-gray-50 min-h-screen flex items-center justify-center">
+
+    <div class="flex w-full max-w-5xl bg-white shadow-2xl rounded-2xl overflow-hidden min-h-[600px] m-4">
+        
+        <!-- Left Side: Image (Hidden on mobile) -->
+        <div class="hidden lg:block lg:w-1/2 relative bg-gray-900">
+            <img src="images/cover_photo.jpg" alt="Sindhu Runners Marathon" class="absolute inset-0 w-full h-full object-cover opacity-80">
+            <div class="absolute inset-0 bg-gradient-to-t from-[#0A3D62] via-transparent to-transparent opacity-90"></div>
+            <div class="absolute bottom-0 left-0 p-12 text-white">
+                <h2 class="font-condensed text-4xl font-bold mb-2 tracking-wide uppercase">Admin Portal</h2>
+                <p class="text-gray-200">Manage events, track registrations, and monitor community progress.</p>
+            </div>
         </div>
         
-        <div id="loginAlert" class="alert alert-error"></div>
-        
-        <form id="loginForm">
-            <div class="form-group">
-                <label for="email" class="form-label">Email</label>
-                <input type="email" id="email" class="form-input" required placeholder="admin@sindhurunners.com">
+        <!-- Right Side: Login Form -->
+        <div class="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-12 md:p-16">
+            <div class="w-full max-w-sm">
+                
+                <div class="text-center mb-10">
+                    <img src="images/SindhuRunnerLogo02-04.png" alt="Logo" class="h-16 w-16 mx-auto rounded-full mb-4 shadow-sm">
+                    <h1 class="font-condensed text-3xl font-bold text-[#0A3D62] tracking-wide uppercase">Sindhu Runners</h1>
+                    <p class="text-gray-500 mt-1 font-medium">Please sign in to continue</p>
+                </div>
+                
+                <div id="loginAlert" class="hidden bg-red-50 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded text-sm flex items-center shadow-sm">
+                    <i data-feather="alert-circle" class="w-5 h-5 mr-2"></i>
+                    <span id="loginAlertText"></span>
+                </div>
+                
+                <form id="loginForm" class="space-y-6">
+                    <div>
+                        <label for="email" class="block text-sm font-semibold text-gray-700 uppercase tracking-wider mb-2">Email Address</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i data-feather="mail" class="h-5 w-5 text-gray-400"></i>
+                            </div>
+                            <input type="email" id="email" required placeholder="admin@sindhurunners.com"
+                                class="pl-10 w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition shadow-sm bg-gray-50 focus:bg-white text-gray-900">
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label for="password" class="block text-sm font-semibold text-gray-700 uppercase tracking-wider mb-2">Password</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i data-feather="lock" class="h-5 w-5 text-gray-400"></i>
+                            </div>
+                            <input type="password" id="password" required placeholder="••••••••"
+                                class="pl-10 w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition shadow-sm bg-gray-50 focus:bg-white text-gray-900">
+                        </div>
+                    </div>
+                    
+                    <button type="submit" id="loginBtn" 
+                        class="w-full bg-[#0A3D62] hover:bg-indigo-700 text-white font-bold py-3.5 px-8 rounded-full text-lg transition shadow-lg flex justify-center items-center mt-8">
+                        Log In
+                    </button>
+                </form>
+                
+                <div class="mt-8 text-center border-t border-gray-100 pt-6">
+                    <a href="index.html" class="text-indigo-600 hover:text-indigo-800 text-sm font-medium inline-flex items-center transition">
+                        <i data-feather="arrow-left" class="w-4 h-4 mr-1"></i> Back to Main Site
+                    </a>
+                </div>
+                
             </div>
-            
-            <div class="form-group">
-                <label for="password" class="form-label">Password</label>
-                <input type="password" id="password" class="form-input" required placeholder="••••••••">
-            </div>
-            
-            <button type="submit" class="btn-login" id="loginBtn">Log In</button>
-        </form>
+        </div>
         
-        <a href="index.html" class="back-link">← Back to Main Site</a>
     </div>
 
     <script>
+        feather.replace();
+
         const API_BASE = (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost') && window.location.port !== '8080'
             ? 'http://localhost:8080/api/v1'
             : '/api/v1';
@@ -199,10 +107,13 @@
             
             const btn = $('loginBtn');
             const alertEl = $('loginAlert');
+            const alertText = $('loginAlertText');
             
-            alertEl.classList.remove('visible');
+            alertEl.classList.add('hidden');
+            alertEl.classList.remove('flex');
             btn.disabled = true;
-            btn.textContent = 'Logging in...';
+            btn.innerHTML = '<i data-feather="loader" class="animate-spin mr-2"></i> Logging in...';
+            feather.replace();
             
             try {
                 const res = await fetch(`${API_BASE}/auth/login`, {
@@ -225,8 +136,9 @@
                 window.location.href = 'admin-events.html';
                 
             } catch (err) {
-                alertEl.textContent = err.message;
-                alertEl.classList.add('visible');
+                alertText.textContent = err.message;
+                alertEl.classList.remove('hidden');
+                alertEl.classList.add('flex');
                 btn.disabled = false;
                 btn.textContent = 'Log In';
             }

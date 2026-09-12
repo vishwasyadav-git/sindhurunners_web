@@ -6,6 +6,13 @@
     <title>Event Registration — Sindhu Runners</title>
     <meta name="description" content="Register for Sindhu Runners events. Secure online registration with Razorpay payment.">
 
+    <!-- Tailwind CSS, AOS, Feather Icons -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <link rel="icon" type="image/x-icon" href="/images/SindhuRunnerLogo02-04.png">
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,736 +22,345 @@
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
     <style>
-        /* ─── Reset & Base ─────────────────────────────────────────────────── */
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-        :root {
-            --primary:       #1a6fc4;
-            --primary-dark:  #134fa3;
-            --primary-light: #e8f1fc;
-            --accent:        #e67e22;
-            --accent-dark:   #cf6d17;
-            --success:       #27ae60;
-            --danger:        #e74c3c;
-            --warning:       #f39c12;
-            --text:          #1c2333;
-            --text-muted:    #5a6478;
-            --border:        #d4dce8;
-            --bg-grad-start: #b8d9f0;
-            --bg-grad-mid:   #aee6d8;
-            --bg-grad-end:   #add8e6;
-            --card-bg:       rgba(255,255,255,0.92);
-            --card-shadow:   0 8px 40px rgba(26,111,196,0.13), 0 2px 10px rgba(0,0,0,0.07);
-            --radius:        16px;
-            --radius-sm:     8px;
-            --transition:    0.22s ease;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(160deg, var(--bg-grad-start) 0%, var(--bg-grad-mid) 50%, var(--bg-grad-end) 100%);
-            min-height: 100vh;
-            color: var(--text);
-        }
-
-        /* ─── Header ────────────────────────────────────────────────────────── */
-        .site-header {
-            background: rgba(255,255,255,0.85);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid var(--border);
-            padding: 12px 24px;
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-        }
-
-        .site-header img { height: 48px; }
-
-        .site-header .title-block { flex: 1; }
-        .site-header .title-block h1 {
-            font-family: 'Roboto Condensed', sans-serif;
-            font-size: 1.4rem;
-            font-weight: 700;
-            color: var(--primary-dark);
-            letter-spacing: 0.5px;
-        }
-        .site-header .title-block p {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-        }
-
-        .back-link {
-            color: var(--primary);
-            text-decoration: none;
-            font-size: 0.85rem;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            transition: color var(--transition);
-        }
-        .back-link:hover { color: var(--primary-dark); }
-
-        /* ─── Main Layout ───────────────────────────────────────────────────── */
-        .page-wrapper {
-            max-width: 960px;
-            margin: 0 auto;
-            padding: 40px 20px 80px;
-        }
-
-        .page-title {
-            font-family: 'Roboto Condensed', sans-serif;
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--primary-dark);
-            text-align: center;
-            margin-bottom: 8px;
-            letter-spacing: 0.5px;
-        }
-
-        .page-subtitle {
-            text-align: center;
-            color: var(--text-muted);
-            font-size: 0.95rem;
-            margin-bottom: 36px;
-        }
-
-        /* ─── Grid layout ───────────────────────────────────────────────────── */
-        .grid {
-            display: grid;
-            grid-template-columns: 1fr 1.7fr;
-            gap: 28px;
-            align-items: start;
-        }
-        @media (max-width: 700px) { .grid { grid-template-columns: 1fr; } }
-
-        /* ─── Event Selection Grid ──────────────────────────────────────────── */
-        .event-catalog {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 24px;
-            margin-top: 20px;
-        }
-        .event-card {
-            background: var(--card-bg);
-            border-radius: var(--radius);
-            box-shadow: var(--card-shadow);
-            backdrop-filter: blur(6px);
-            border: 1px solid rgba(255,255,255,0.6);
-            padding: 24px;
-            transition: all var(--transition);
-            cursor: pointer;
-            text-decoration: none;
-            color: inherit;
-            display: flex;
-            flex-direction: column;
-        }
-        .event-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 12px 48px rgba(26,111,196,0.2);
-            border-color: var(--primary-light);
-        }
-        .event-card h3 {
-            font-family: 'Roboto Condensed', sans-serif;
-            font-size: 1.3rem;
-            color: var(--primary-dark);
-            margin-bottom: 12px;
-        }
-        .event-card p {
-            font-size: 0.9rem;
-            color: var(--text-muted);
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .event-card .fee {
-            margin-top: auto;
-            padding-top: 16px;
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: var(--success);
-        }
-
-        /* ─── Card ──────────────────────────────────────────────────────────── */
-        .card {
-            background: var(--card-bg);
-            border-radius: var(--radius);
-            box-shadow: var(--card-shadow);
-            backdrop-filter: blur(6px);
-            border: 1px solid rgba(255,255,255,0.6);
-            overflow: hidden;
-        }
-
-        .card-header {
-            background: linear-gradient(135deg, var(--primary) 0%, #1a8fc4 100%);
-            padding: 20px 24px;
-        }
-        .card-header h2 {
-            font-family: 'Roboto Condensed', sans-serif;
-            color: #fff;
-            font-size: 1.15rem;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-        }
-
-        .card-body { padding: 24px; }
-
-        /* ─── Event Info Card ───────────────────────────────────────────────── */
-        .event-name {
-            font-family: 'Roboto Condensed', sans-serif;
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: var(--primary-dark);
-            margin-bottom: 16px;
-            line-height: 1.3;
-        }
-
-        .info-row {
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-            padding: 8px 0;
-            border-bottom: 1px solid #f0f4f8;
-        }
-        .info-row:last-child { border-bottom: none; }
-        .info-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
-        .info-label { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 2px; }
-        .info-value { font-size: 0.95rem; font-weight: 600; color: var(--text); }
-
-        .fee-badge {
-            display: inline-block;
-            background: linear-gradient(135deg, #27ae60, #2ecc71);
-            color: #fff;
-            font-weight: 700;
-            font-size: 1.25rem;
-            border-radius: 50px;
-            padding: 6px 20px;
-            margin: 16px 0 8px;
-            letter-spacing: 0.5px;
-        }
-
-        .badge-closed {
-            display: inline-block;
-            background: var(--danger);
-            color: #fff;
-            border-radius: 50px;
-            padding: 4px 14px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            margin-top: 10px;
-        }
-        .badge-open {
-            display: inline-block;
-            background: var(--success);
-            color: #fff;
-            border-radius: 50px;
-            padding: 4px 14px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            margin-top: 10px;
-        }
-
-        /* ─── Registration Summary Card ─────────────────────────────────────── */
-        .summary-card {
-            background: #f8fbff;
-            border: 2px solid var(--primary-light);
-            border-radius: var(--radius-sm);
-            padding: 16px;
-            margin-top: 20px;
-            display: none;
-        }
-        .summary-card.visible { display: block; }
-        .summary-title { font-weight: 600; color: var(--primary-dark); margin-bottom: 10px; }
-        .summary-row { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 0.9rem; }
-        .summary-label { color: var(--text-muted); }
-        .summary-val { font-weight: 600; color: var(--text); }
-
-        /* ─── Form ──────────────────────────────────────────────────────────── */
-        .form-group { margin-bottom: 20px; }
-        .form-row { display: flex; gap: 20px; }
-        .form-row .form-group { flex: 1; }
-
-        .form-label {
-            display: block;
-            font-size: 0.82rem;
-            font-weight: 600;
-            color: var(--text-muted);
-            margin-bottom: 6px;
-            letter-spacing: 0.4px;
-            text-transform: uppercase;
-        }
-
-        .form-input {
-            width: 100%;
-            padding: 11px 14px;
-            border: 1.5px solid var(--border);
-            border-radius: var(--radius-sm);
-            font-size: 0.95rem;
-            font-family: 'Inter', sans-serif;
-            color: var(--text);
-            background: #fff;
-            transition: border-color var(--transition), box-shadow var(--transition);
-            outline: none;
-        }
-        .form-input:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(26,111,196,0.12);
-        }
-        .form-input.error {
-            border-color: var(--danger);
-            box-shadow: 0 0 0 3px rgba(231,76,60,0.10);
-        }
-
-        .form-error {
-            color: var(--danger);
-            font-size: 0.78rem;
-            margin-top: 4px;
-            display: none;
-        }
-        .form-error.visible { display: block; }
-
-        /* ─── File upload ───────────────────────────────────────────────────── */
+        body { font-family: 'Inter', sans-serif; }
+        .font-condensed { font-family: 'Roboto Condensed', sans-serif; }
         .file-upload-zone {
-            border: 2px dashed var(--border);
-            border-radius: var(--radius-sm);
-            padding: 24px;
-            text-align: center;
-            cursor: pointer;
-            transition: all var(--transition);
-            background: #f8fbff;
-            position: relative;
+            border: 2px dashed #d1d5db;
+            transition: all 0.2s;
         }
-        .file-upload-zone:hover, .file-upload-zone.drag-over {
-            border-color: var(--primary);
-            background: var(--primary-light);
+        .file-upload-zone.drag-over {
+            border-color: #4f46e5;
+            background-color: #eef2ff;
         }
-        .file-upload-zone input[type="file"] {
-            position: absolute;
-            inset: 0;
-            opacity: 0;
-            cursor: pointer;
-        }
-        .upload-icon { font-size: 2.2rem; margin-bottom: 8px; }
-        .upload-text { font-size: 0.88rem; color: var(--text-muted); }
-        .upload-text strong { color: var(--primary); }
-        .upload-hint { font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; }
-
-        .file-preview {
-            display: none;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 14px;
-            background: #f0f9f4;
-            border: 1px solid #b2dfcc;
-            border-radius: var(--radius-sm);
-            margin-top: 8px;
-        }
-        .file-preview.visible { display: flex; }
-        .file-preview-icon { font-size: 1.6rem; }
-        .file-preview-name { font-size: 0.85rem; font-weight: 500; color: var(--text); flex: 1; word-break: break-all; }
-        .file-preview-size { font-size: 0.75rem; color: var(--text-muted); }
-        .file-remove {
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 1.2rem;
-            color: var(--danger);
-            padding: 4px;
-            line-height: 1;
-        }
-
-        /* ─── Consent ───────────────────────────────────────────────────────── */
-        .consent-box {
-            background: #fff8e8;
-            border: 1px solid #f0d080;
-            border-radius: var(--radius-sm);
-            padding: 14px 16px;
-            margin-bottom: 20px;
-        }
-        .consent-box p {
-            font-size: 0.82rem;
-            color: #7a5c00;
-            line-height: 1.6;
-            margin-bottom: 10px;
-        }
-        .consent-check {
-            display: flex;
-            align-items: flex-start;
-            gap: 8px;
-            cursor: pointer;
-            margin-bottom: 8px;
-        }
-        .consent-check input[type="checkbox"] {
-            width: 16px;
-            height: 16px;
-            accent-color: var(--primary);
-            cursor: pointer;
-            margin-top: 2px;
-        }
-        .consent-check span { font-size: 0.83rem; color: var(--text); flex: 1; }
-
-        /* ─── Submit button ─────────────────────────────────────────────────── */
-        .btn-register {
-            width: 100%;
-            padding: 15px;
-            background: linear-gradient(135deg, var(--primary) 0%, #1a8fc4 100%);
-            color: #fff;
-            border: none;
-            border-radius: var(--radius-sm);
-            font-size: 1.05rem;
-            font-family: 'Roboto Condensed', sans-serif;
-            font-weight: 700;
-            letter-spacing: 0.8px;
-            cursor: pointer;
-            transition: all var(--transition);
-            position: relative;
-            overflow: hidden;
-        }
-        .btn-register:hover:not(:disabled) {
-            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
-            transform: translateY(-1px);
-            box-shadow: 0 6px 20px rgba(26,111,196,0.35);
-        }
-        .btn-register:active { transform: translateY(0); }
-        .btn-register:disabled {
-            background: #9fb8d5;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-        .btn-register .btn-text { display: inline-block; }
-        .btn-register .btn-spinner { display: none; }
-        .btn-register.loading .btn-text { display: none; }
-        .btn-register.loading .btn-spinner { display: inline-block; }
-
-        /* ─── Global alert ──────────────────────────────────────────────────── */
-        .alert {
-            padding: 14px 18px;
-            border-radius: var(--radius-sm);
-            font-size: 0.88rem;
-            margin-bottom: 20px;
-            display: none;
-            line-height: 1.5;
-        }
-        .alert.visible { display: block; }
-        .alert-error { background: #fdf0ee; border: 1px solid #f5c6c0; color: #922b21; }
-        .alert-info  { background: #eaf4ff; border: 1px solid #b3d4f5; color: #1a4a8a; }
-
-        /* ─── Security note ─────────────────────────────────────────────────── */
-        .security-note {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.78rem;
-            color: var(--text-muted);
-            margin-top: 14px;
-            text-align: center;
-            justify-content: center;
-        }
-
-        /* ─── Processing overlay ─────────────────────────────────────────────── */
-        .processing-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(26, 40, 70, 0.6);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-            backdrop-filter: blur(4px);
-        }
-        .processing-overlay.visible { display: flex; }
-        .processing-card {
-            background: #fff;
-            border-radius: 20px;
-            padding: 40px;
-            text-align: center;
-            max-width: 340px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.25);
-        }
+        
         .spinner {
-            width: 52px;
-            height: 52px;
-            border: 4px solid #e8f1fc;
-            border-top-color: var(--primary);
-            border-radius: 50%;
+            border: 4px solid #eef2ff;
+            border-top-color: #4f46e5;
             animation: spin 0.8s linear infinite;
-            margin: 0 auto 20px;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
-        .processing-title {
-            font-family: 'Roboto Condensed', sans-serif;
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: var(--text);
-            margin-bottom: 8px;
-        }
-        .processing-sub { font-size: 0.85rem; color: var(--text-muted); }
-
-        /* ─── Responsive ─────────────────────────────────────────────────────── */
-        @media (max-width: 480px) {
-            .page-title { font-size: 1.5rem; }
-            .card-body { padding: 18px; }
-            .form-row { flex-direction: column; gap: 0; }
-        }
+        
+        /* Utility for hiding spinner initially */
+        .btn-spinner { display: none; }
+        .loading .btn-text { display: none; }
+        .loading .btn-spinner { display: inline-flex; align-items: center; justify-content: center; }
     </style>
 </head>
-<body>
+<body class="bg-gray-50 text-gray-800">
 
-<header class="site-header">
-    <a href="index.html">
-        <img src="images/SindhuRunnerLogo02-04.png" alt="Sindhu Runners Logo">
-    </a>
-    <div class="title-block">
-        <h1>Sindhu Runners</h1>
-        <p>Event Registration Portal</p>
+<!-- Navigation -->
+<nav class="bg-[#0A3D62] shadow-lg sticky top-0 w-full z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center h-16">
+            <a href="index.html" class="flex items-center">
+                <img src="images/SindhuRunnerLogo02-04.png" alt="Logo" class="h-10 w-10 mr-2 rounded-full">
+                <span class="text-xl font-bold text-white font-condensed tracking-wide">SINDHU RUNNERS</span>
+            </a>
+            <div class="flex items-center space-x-4">
+                <a href="index.html" class="text-white hover:text-gray-300 font-medium text-sm flex items-center transition">
+                    <i data-feather="arrow-left" class="w-4 h-4 mr-1"></i> Back to Home
+                </a>
+            </div>
+        </div>
     </div>
-    <a href="index.html" class="back-link">← Back to Home</a>
-</header>
+</nav>
 
-<div class="processing-overlay" id="processingOverlay" role="status" aria-live="polite">
-    <div class="processing-card">
-        <div class="spinner" aria-hidden="true"></div>
-        <div class="processing-title" id="processingTitle">Processing Payment…</div>
-        <div class="processing-sub" id="processingSub">Please do not close this window.</div>
+<!-- Processing Overlay -->
+<div id="processingOverlay" class="fixed inset-0 bg-gray-900 bg-opacity-75 z-[100] hidden items-center justify-center backdrop-blur-sm transition-opacity" role="status" aria-live="polite">
+    <div class="bg-white rounded-2xl p-8 max-w-sm w-full text-center shadow-2xl mx-4">
+        <div class="spinner w-12 h-12 rounded-full mx-auto mb-4" aria-hidden="true"></div>
+        <h3 class="font-condensed text-xl font-bold text-gray-900 mb-2" id="processingTitle">Processing Payment…</h3>
+        <p class="text-gray-500 text-sm" id="processingSub">Please do not close this window.</p>
     </div>
 </div>
 
-<main class="page-wrapper">
-    <h1 class="page-title" id="pageTitle">Event Registration</h1>
-    <p class="page-subtitle">Complete the form below to register for the event.</p>
+<main class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 mb-16">
+    <div class="text-center mb-10" data-aos="fade-down">
+        <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-3 font-condensed uppercase tracking-wider" id="pageTitle">Event Registration</h1>
+        <div class="w-16 h-1 bg-indigo-600 mx-auto mb-4"></div>
+        <p class="text-gray-500">Secure online registration for Sindhu Runners events.</p>
+    </div>
 
     <!-- Event Selection Flow -->
     <div id="eventSelectionFlow" style="display: none;">
-        <div id="catalogError" class="alert alert-error" style="display: none; margin-top: 20px;"></div>
-        <div id="catalogGrid" class="event-catalog"></div>
+        <div id="catalogError" class="hidden bg-red-50 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded shadow-sm" role="alert"></div>
+        
+        <div id="catalogGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Event cards generated by JS -->
+        </div>
     </div>
 
     <!-- Registration Flow -->
     <div id="registrationFlow" style="display: none;">
-        <div class="grid">
-            <aside>
-                <div class="card" id="eventCard">
-                    <div class="card-header">
-                        <h2>📋 Event Details</h2>
+        <div class="flex flex-col lg:flex-row gap-8 items-start">
+            
+            <!-- Left Column: Event Details Summary -->
+            <aside class="w-full lg:w-1/3 order-2 lg:order-1 sticky top-24" data-aos="fade-right">
+                <div class="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden">
+                    <div class="bg-[#0A3D62] px-6 py-4">
+                        <h2 class="text-white font-condensed font-bold text-lg flex items-center">
+                            <i data-feather="info" class="w-5 h-5 mr-2"></i> Event Summary
+                        </h2>
                     </div>
-                    <div class="card-body">
+                    <div class="p-6">
                         <div id="eventInfo" style="display:none">
-                            <div class="event-name" id="eventNameDisplay"></div>
-                            <div class="info-row">
-                                <span class="info-icon">📅</span>
+                            <h3 class="font-condensed text-2xl font-bold text-gray-900 mb-4" id="eventNameDisplay"></h3>
+                            
+                            <div class="flex items-start mb-6">
+                                <i data-feather="calendar" class="w-5 h-5 text-indigo-600 mt-1 mr-3 flex-shrink-0"></i>
                                 <div>
-                                    <div class="info-label">Event Date</div>
-                                    <div class="info-value" id="eventDateDisplay">—</div>
+                                    <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Event Date</div>
+                                    <div class="text-gray-900 font-medium" id="eventDateDisplay">—</div>
                                 </div>
                             </div>
-                            <div class="info-row" style="flex-direction: column;">
-                                <div class="info-label" style="font-weight: bold; margin-bottom: 8px;">Age Categories & Fees:</div>
-                                <div id="eventCategoriesDisplay" style="width: 100%;"></div>
+
+                            <div class="mb-6">
+                                <div class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Age Categories & Fees</div>
+                                <div id="eventCategoriesDisplay" class="space-y-2 text-sm text-gray-700 bg-gray-50 p-3 rounded-lg border border-gray-100">
+                                </div>
                             </div>
-                            <div>
-                                <span class="badge-open" id="statusBadge">✓ Registration Open</span>
+                            
+                            <div class="mb-6">
+                                <span id="statusBadge" class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-800">
+                                    ✓ Registration Open
+                                </span>
                             </div>
                             
                             <!-- Registration Summary (Calculated Client Side) -->
-                            <div class="summary-card" id="regSummaryCard">
-                                <div class="summary-title">Your Registration Summary</div>
-                                <div class="summary-row">
-                                    <span class="summary-label">Age as of Event:</span>
-                                    <span class="summary-val" id="summaryAge">—</span>
+                            <div id="regSummaryCard" class="hidden bg-indigo-50 rounded-lg p-4 border border-indigo-100">
+                                <h4 class="text-indigo-900 font-semibold mb-3 text-sm uppercase tracking-wider">Your Registration</h4>
+                                <div class="flex justify-between items-center text-sm text-indigo-800 mb-2">
+                                    <span>Age on Race Day:</span>
+                                    <span id="summaryAge" class="font-medium">—</span>
                                 </div>
-                                <div class="summary-row">
-                                    <span class="summary-label">Eligible Category:</span>
-                                    <span class="summary-val" id="summaryCategory">—</span>
+                                <div class="flex justify-between items-center text-sm text-indigo-800 mb-3 pb-3 border-b border-indigo-200">
+                                    <span>Category:</span>
+                                    <span id="summaryCategory" class="font-medium text-right ml-4">—</span>
                                 </div>
-                                <div class="summary-row" style="margin-top:8px; padding-top:8px; border-top:1px solid #cce0ff;">
-                                    <span class="summary-label">Registration Fee:</span>
-                                    <span class="summary-val" id="summaryFee" style="color:var(--success); font-size:1.1rem;">—</span>
+                                <div class="flex justify-between items-center">
+                                    <span class="font-semibold text-indigo-900">Total Fee:</span>
+                                    <span id="summaryFee" class="text-lg font-bold text-green-600">—</span>
                                 </div>
                             </div>
                         </div>
-                        <div id="eventLoadError" style="display:none;color:#e74c3c;font-size:0.88rem;padding:8px 0;">
-                            ⚠️ Could not load event details. Please check the URL or try again.
+                        
+                        <div id="eventLoadError" class="hidden bg-red-50 text-red-600 p-3 rounded text-sm mt-4">
+                            <i data-feather="alert-circle" class="w-4 h-4 inline mr-1"></i> Could not load event details.
                         </div>
                     </div>
                 </div>
             </aside>
 
-            <section>
-                <div class="card">
-                    <div class="card-header">
-                        <h2>📝 Registration Form</h2>
+            <!-- Right Column: Form -->
+            <section class="w-full lg:w-2/3 order-1 lg:order-2" data-aos="fade-left">
+                <div class="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden">
+                    <div class="bg-indigo-600 px-6 py-4">
+                        <h2 class="text-white font-condensed font-bold text-lg flex items-center">
+                            <i data-feather="edit-3" class="w-5 h-5 mr-2"></i> Participant Details
+                        </h2>
                     </div>
-                    <div class="card-body">
-                        <div class="alert alert-error" id="globalAlert" role="alert"></div>
+                    
+                    <div class="p-6 md:p-8">
+                        <div id="globalAlert" class="hidden p-4 mb-6 rounded-lg text-sm" role="alert"></div>
 
-                        <form id="registrationForm" novalidate>
-                            <h3 style="font-size: 1.1rem; color: var(--primary-dark); margin-bottom: 12px;">A. Participant Details</h3>
-                            <div class="form-group">
-                                <label class="form-label" for="fullName">Full Name *</label>
-                                <input class="form-input" type="text" id="fullName" name="fullName" placeholder="e.g. Prasad Korgaonkar" required>
-                            </div>
+                        <form id="registrationForm" novalidate class="space-y-8">
                             
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label class="form-label" for="dob">Date of Birth *</label>
-                                    <input class="form-input" type="date" id="dob" name="dob" required>
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label" for="gender">Gender *</label>
-                                    <select class="form-input" id="gender" name="gender" required>
-                                        <option value="">Select Gender</option>
-                                        <option value="Male">Male</option>
-                                        <option value="Female">Female</option>
-                                    </select>
-                                </div>
-                            </div>
-                            
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label class="form-label" for="schoolName">School / College Name *</label>
-                                    <input class="form-input" type="text" id="schoolName" name="schoolName" placeholder="School Name" required>
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label" for="tShirtSize">T-Shirt Size *</label>
-                                    <select class="form-input" id="tShirtSize" name="tShirtSize" required>
-                                        <option value="">Select Size</option>
-                                        <option value="22">22</option>
-                                        <option value="24">24</option>
-                                        <option value="26">26</option>
-                                        <option value="28">28</option>
-                                        <option value="30">30</option>
-                                        <option value="32">32</option>
-                                        <option value="34">34</option>
-                                        <option value="36">36</option>
-                                        <option value="38">38</option>
-                                        <option value="40">40</option>
-                                        <option value="42">42</option>
-                                    </select>
-                                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">Please select carefully. Size changes may not be possible.</div>
-                                </div>
-                            </div>
-                            
-                            <hr style="border: 0; border-top: 1px solid var(--border); margin: 24px 0;">
-                            
-                            <h3 style="font-size: 1.1rem; color: var(--primary-dark); margin-bottom: 12px;">B. Contact & Address Details</h3>
-                            
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label class="form-label" for="mobileNumber">Mobile Number *</label>
-                                    <input class="form-input" type="tel" id="mobileNumber" name="mobileNumber" placeholder="10-digit number" pattern="[6-9]\d{9}" required>
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label" for="emailId">Email ID *</label>
-                                    <input class="form-input" type="email" id="emailId" name="emailId" placeholder="email@example.com" required>
-                                </div>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label class="form-label" for="address">Address *</label>
-                                <input class="form-input" type="text" id="address" name="address" placeholder="Street, landmark" required>
-                            </div>
-                            
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label class="form-label" for="city">City / Village *</label>
-                                    <input class="form-input" type="text" id="city" name="city" required>
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label" for="district">District *</label>
-                                    <input class="form-input" type="text" id="district" name="district" required>
-                                </div>
-                            </div>
-                            
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label class="form-label" for="state">State *</label>
-                                    <input class="form-input" type="text" id="state" name="state" required>
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label" for="pinCode">PIN Code *</label>
-                                    <input class="form-input" type="text" id="pinCode" name="pinCode" required>
-                                </div>
-                            </div>
-
-                            <hr style="border: 0; border-top: 1px solid var(--border); margin: 24px 0;">
-
-                            <h3 style="font-size: 1.1rem; color: var(--primary-dark); margin-bottom: 12px;">C. Emergency Contact</h3>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label class="form-label" for="emergencyContactName">Emergency Contact Name *</label>
-                                    <input class="form-input" type="text" id="emergencyContactName" name="emergencyContactName" required>
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label" for="emergencyContactNumber">Emergency Contact Number *</label>
-                                    <input class="form-input" type="text" id="emergencyContactNumber" name="emergencyContactNumber" required>
-                                </div>
-                            </div>
-                            
-                            <hr style="border: 0; border-top: 1px solid var(--border); margin: 24px 0;">
-
-                            <h3 style="font-size: 1.1rem; color: var(--primary-dark); margin-bottom: 12px;">D. Identity / Date of Birth Verification</h3>
-                            <div class="form-group">
-                                <label class="form-label">Upload ONE Valid Identity / Date of Birth Proof *</label>
-                                <div class="file-upload-zone" id="uploadZone">
-                                    <input type="file" id="aadhaarDocument" name="aadhaarDocument" accept=".jpg,.jpeg,.png,.pdf" aria-label="Upload Identity document" required>
-                                    <div class="upload-icon">📄</div>
-                                    <div class="upload-text">
-                                        <strong>Click to upload</strong> or drag &amp; drop
-                                    </div>
-                                    <div class="upload-hint">JPG, PNG or PDF · Max 5 MB</div>
-                                </div>
-                                <div class="file-preview" id="filePreview">
-                                    <span class="file-preview-icon" id="filePreviewIcon">📄</span>
+                            <!-- Section A -->
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-900 border-b border-gray-200 pb-2 mb-4 font-condensed">A. Personal Information</h3>
+                                <div class="space-y-5">
                                     <div>
-                                        <div class="file-preview-name" id="filePreviewName"></div>
-                                        <div class="file-preview-size" id="filePreviewSize"></div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1" for="fullName">Full Name *</label>
+                                        <input type="text" id="fullName" name="fullName" placeholder="e.g. Prasad Korgaonkar" required
+                                            class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition shadow-sm bg-white">
                                     </div>
-                                    <button type="button" class="file-remove" id="fileRemove" aria-label="Remove file">✕</button>
-                                </div>
-                                <div style="font-size: 0.8rem; color: var(--danger); margin-top: 8px; background: #fdf0ee; padding: 8px; border-radius: 4px;">
-                                    <strong>Important:</strong> The document must be genuine, valid and clearly readable. If any false, forged, altered or incorrect information is found during verification, the participant's registration will be cancelled and the registration fee will not be refunded.
+                                    
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1" for="dob">Date of Birth *</label>
+                                            <input type="date" id="dob" name="dob" required
+                                                class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition shadow-sm bg-white">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1" for="gender">Gender *</label>
+                                            <select id="gender" name="gender" required
+                                                class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition shadow-sm bg-white">
+                                                <option value="">Select Gender</option>
+                                                <option value="Male">Male</option>
+                                                <option value="Female">Female</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1" for="schoolName">School / College / Club *</label>
+                                            <input type="text" id="schoolName" name="schoolName" placeholder="Organization name" required
+                                                class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition shadow-sm bg-white">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1" for="tShirtSize">T-Shirt Size *</label>
+                                            <select id="tShirtSize" name="tShirtSize" required
+                                                class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition shadow-sm bg-white">
+                                                <option value="">Select Size</option>
+                                                <option value="22">22 (Kids)</option>
+                                                <option value="24">24 (Kids)</option>
+                                                <option value="26">26 (Kids)</option>
+                                                <option value="28">28 (Kids)</option>
+                                                <option value="30">30 (Kids)</option>
+                                                <option value="32">32 (Kids)</option>
+                                                <option value="34">34 (XS)</option>
+                                                <option value="36">36 (S)</option>
+                                                <option value="38">38 (M)</option>
+                                                <option value="40">40 (L)</option>
+                                                <option value="42">42 (XL)</option>
+                                            </select>
+                                            <p class="text-xs text-gray-500 mt-1">Please select carefully. Size changes may not be possible later.</p>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             
-                            <hr style="border: 0; border-top: 1px solid var(--border); margin: 24px 0;">
+                            <!-- Section B -->
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-900 border-b border-gray-200 pb-2 mb-4 font-condensed">B. Contact & Address Details</h3>
+                                <div class="space-y-5">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1" for="mobileNumber">Mobile Number *</label>
+                                            <input type="tel" id="mobileNumber" name="mobileNumber" placeholder="10-digit number" pattern="[6-9]\d{9}" required
+                                                class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition shadow-sm bg-white">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1" for="emailId">Email ID *</label>
+                                            <input type="email" id="emailId" name="emailId" placeholder="email@example.com" required
+                                                class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition shadow-sm bg-white">
+                                        </div>
+                                    </div>
+                                    
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1" for="address">Address *</label>
+                                        <input type="text" id="address" name="address" placeholder="Street, landmark" required
+                                            class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition shadow-sm bg-white">
+                                    </div>
+                                    
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1" for="city">City / Village *</label>
+                                            <input type="text" id="city" name="city" required
+                                                class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition shadow-sm bg-white">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1" for="district">District *</label>
+                                            <input type="text" id="district" name="district" required
+                                                class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition shadow-sm bg-white">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1" for="state">State *</label>
+                                            <input type="text" id="state" name="state" required
+                                                class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition shadow-sm bg-white">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1" for="pinCode">PIN Code *</label>
+                                            <input type="text" id="pinCode" name="pinCode" required
+                                                class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition shadow-sm bg-white">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Section C -->
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-900 border-b border-gray-200 pb-2 mb-4 font-condensed">C. Emergency Contact</h3>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1" for="emergencyContactName">Contact Name *</label>
+                                        <input type="text" id="emergencyContactName" name="emergencyContactName" required
+                                            class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition shadow-sm bg-white">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1" for="emergencyContactNumber">Contact Number *</label>
+                                        <input type="tel" id="emergencyContactNumber" name="emergencyContactNumber" required
+                                            class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition shadow-sm bg-white">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Section D -->
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-900 border-b border-gray-200 pb-2 mb-4 font-condensed">D. Identity & Age Verification</h3>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Upload ONE Valid Identity / DOB Proof *</label>
+                                    
+                                    <div class="file-upload-zone bg-gray-50 rounded-xl p-8 text-center cursor-pointer relative" id="uploadZone">
+                                        <input type="file" id="aadhaarDocument" name="aadhaarDocument" accept=".jpg,.jpeg,.png,.pdf" aria-label="Upload Identity document" required
+                                            class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+                                        <i data-feather="upload-cloud" class="w-10 h-10 text-indigo-400 mx-auto mb-3"></i>
+                                        <p class="text-gray-700 font-medium mb-1"><span class="text-indigo-600">Click to upload</span> or drag & drop</p>
+                                        <p class="text-xs text-gray-500">JPG, PNG or PDF (Max 5 MB)</p>
+                                    </div>
 
-                            <h3 style="font-size: 1.1rem; color: var(--primary-dark); margin-bottom: 12px;">E. Parent / Guardian Consent</h3>
-                            <div class="consent-box">
-                                <label class="consent-check">
-                                    <input type="checkbox" id="consentParent" name="consentParent" required>
-                                    <span>I am the parent/legal guardian of the participant and authorize the participant to participate in Sindhu Young Champions 2026. *</span>
-                                </label>
-                                <label class="consent-check">
-                                    <input type="checkbox" id="consentInfo" name="consentInfo" required>
-                                    <span>I confirm that all information provided during registration is correct and belongs to the participant. *</span>
-                                </label>
-                                <label class="consent-check">
-                                    <input type="checkbox" id="consentFit" name="consentFit" required>
-                                    <span>I confirm that the participant is fit to participate in the event. *</span>
-                                </label>
-                                <label class="consent-check">
-                                    <input type="checkbox" id="consentTerms" name="consentTerms" required>
-                                    <span>I agree to the Sindhu Young Champions 2026 Terms & Conditions. *</span>
-                                </label>
-                                <label class="consent-check" style="margin-top: 12px;">
-                                    <input type="checkbox" id="consentMedia" name="consentMedia">
-                                    <span>(Optional) I consent to photographs and videos of the participant captured during the event being used for event-related promotional purposes.</span>
-                                </label>
+                                    <div id="filePreview" class="hidden items-center justify-between bg-indigo-50 border border-indigo-100 rounded-lg p-4 mt-2">
+                                        <div class="flex items-center">
+                                            <i data-feather="file" class="text-indigo-500 w-8 h-8 mr-3" id="filePreviewIcon"></i>
+                                            <div>
+                                                <p class="text-sm font-medium text-gray-800 truncate max-w-[200px] md:max-w-xs" id="filePreviewName"></p>
+                                                <p class="text-xs text-gray-500" id="filePreviewSize"></p>
+                                            </div>
+                                        </div>
+                                        <button type="button" id="fileRemove" class="text-red-500 hover:bg-red-50 p-2 rounded-full transition" aria-label="Remove file">
+                                            <i data-feather="trash-2" class="w-5 h-5"></i>
+                                        </button>
+                                    </div>
+
+                                    <div class="mt-4 bg-yellow-50 border-l-4 border-yellow-400 p-4 text-sm text-yellow-800 rounded">
+                                        <p class="flex items-start">
+                                            <i data-feather="alert-triangle" class="w-5 h-5 mr-2 flex-shrink-0"></i>
+                                            <span><strong>Important:</strong> The document must be genuine, valid and clearly readable. If any false information is found during verification, the registration will be cancelled without refund.</span>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Section E -->
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-900 border-b border-gray-200 pb-2 mb-4 font-condensed">E. Declarations & Consent</h3>
+                                <div class="space-y-4 bg-gray-50 p-5 rounded-lg border border-gray-200">
+                                    <label class="flex items-start cursor-pointer">
+                                        <input type="checkbox" id="consentParent" name="consentParent" required class="mt-1 h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 cursor-pointer">
+                                        <span class="ml-3 text-sm text-gray-700">I am the parent/legal guardian (if applicable) and authorize the participant to enter this event. *</span>
+                                    </label>
+                                    <label class="flex items-start cursor-pointer">
+                                        <input type="checkbox" id="consentInfo" name="consentInfo" required class="mt-1 h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 cursor-pointer">
+                                        <span class="ml-3 text-sm text-gray-700">I confirm that all information provided during registration is correct. *</span>
+                                    </label>
+                                    <label class="flex items-start cursor-pointer">
+                                        <input type="checkbox" id="consentFit" name="consentFit" required class="mt-1 h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 cursor-pointer">
+                                        <span class="ml-3 text-sm text-gray-700">I confirm that the participant is medically and physically fit to participate. *</span>
+                                    </label>
+                                    <label class="flex items-start cursor-pointer">
+                                        <input type="checkbox" id="consentTerms" name="consentTerms" required class="mt-1 h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 cursor-pointer">
+                                        <span class="ml-3 text-sm text-gray-700">I agree to the Event Terms & Conditions and Rules. *</span>
+                                    </label>
+                                    <label class="flex items-start cursor-pointer mt-2 pt-3 border-t border-gray-200">
+                                        <input type="checkbox" id="consentMedia" name="consentMedia" class="mt-1 h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 cursor-pointer">
+                                        <span class="ml-3 text-sm text-gray-600">(Optional) I consent to photographs and videos being used for promotional purposes.</span>
+                                    </label>
+                                </div>
                             </div>
 
-                            <button type="submit" class="btn-register" id="registerBtn" disabled>
-                                <span class="btn-text">🚀 Register &amp; Pay</span>
-                                <span class="btn-spinner">⏳ Processing…</span>
-                            </button>
-
-                            <div class="security-note">
-                                🔐 Payments secured by Razorpay · 256-bit SSL encryption
+                            <div class="pt-4 border-t border-gray-200">
+                                <button type="submit" id="registerBtn" disabled
+                                    class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 px-8 rounded-full text-lg transition shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none flex justify-center items-center">
+                                    <span class="btn-text flex items-center"><i data-feather="check-circle" class="mr-2"></i> Confirm & Proceed to Payment</span>
+                                    <span class="btn-spinner flex items-center"><i data-feather="loader" class="animate-spin mr-2"></i> Processing...</span>
+                                </button>
+                                <p class="text-center text-xs text-gray-500 mt-4 flex items-center justify-center">
+                                    <i data-feather="lock" class="w-3 h-3 mr-1"></i> Payments secured by Razorpay · 256-bit SSL encryption
+                                </p>
                             </div>
 
                         </form>
@@ -756,6 +372,10 @@
 </main>
 
 <script>
+    // Initialize icons & animations
+    feather.replace();
+    AOS.init({ once: true, offset: 50, duration: 600 });
+
     const API_BASE = (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost') && window.location.port !== '8080'
         ? 'http://localhost:8080/api/v1'
         : '/api/v1';
@@ -786,25 +406,29 @@
         return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
     }
 
-    function showAlert(msg) {
+    function showAlert(msg, isError = true) {
         const el = $('globalAlert');
-        el.textContent = msg;
-        el.classList.add('visible');
-        el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        el.innerHTML = `<div class="flex items-center"><i data-feather="${isError?'alert-circle':'info'}" class="w-5 h-5 mr-2"></i> ${msg}</div>`;
+        el.className = `p-4 mb-6 rounded-lg text-sm block ${isError ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-blue-50 text-blue-700 border border-blue-200'}`;
+        feather.replace();
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 
     function hideAlert() {
-        $('globalAlert').classList.remove('visible');
+        $('globalAlert').classList.add('hidden');
+        $('globalAlert').classList.remove('block');
     }
 
     function showOverlay(title = 'Processing…', sub = 'Please do not close this window.') {
         $('processingTitle').textContent = title;
         $('processingSub').textContent = sub;
-        $('processingOverlay').classList.add('visible');
+        $('processingOverlay').classList.remove('hidden');
+        $('processingOverlay').classList.add('flex');
     }
 
     function hideOverlay() {
-        $('processingOverlay').classList.remove('visible');
+        $('processingOverlay').classList.add('hidden');
+        $('processingOverlay').classList.remove('flex');
     }
 
     const eventCode = getEventCode();
@@ -813,7 +437,7 @@
         $('registrationFlow').style.display = 'block';
         loadEvent(eventCode);
     } else {
-        $('pageTitle').textContent = 'Select an Event';
+        $('pageTitle').textContent = 'SELECT AN EVENT';
         document.title = 'Events | Sindhu Runners';
         $('eventSelectionFlow').style.display = 'block';
         loadAllEvents();
@@ -826,36 +450,48 @@
             
             if (!res.ok || !json.success) {
                 $('catalogError').textContent = json.message || 'Failed to load events.';
-                $('catalogError').style.display = 'block';
+                $('catalogError').classList.remove('hidden');
                 return;
             }
 
             const events = json.data;
             if (events.length === 0) {
                 $('catalogError').textContent = 'No events are currently open for registration.';
-                $('catalogError').style.display = 'block';
-                $('catalogError').className = 'alert alert-info';
+                $('catalogError').classList.remove('bg-red-50', 'text-red-700', 'border-red-500');
+                $('catalogError').classList.add('bg-blue-50', 'text-blue-700', 'border-blue-500');
+                $('catalogError').classList.remove('hidden');
                 return;
             }
 
             const grid = $('catalogGrid');
-            events.forEach(evt => {
+            events.forEach((evt, idx) => {
                 const card = document.createElement('a');
-                card.className = 'event-card';
                 card.href = `?event=${encodeURIComponent(evt.eventCode)}`;
+                card.className = "bg-white rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 p-6 border border-gray-100 flex flex-col h-full cursor-pointer";
+                card.setAttribute('data-aos', 'fade-up');
+                card.setAttribute('data-aos-delay', (idx * 100).toString());
                 
                 const startDate = formatDate(evt.eventDate);
                 
                 card.innerHTML = `
-                    <h3>${evt.eventName}</h3>
-                    <p>📅 ${startDate}</p>
+                    <div class="mb-4">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 mb-3">Running Event</span>
+                        <h3 class="font-condensed text-xl font-bold text-gray-900 leading-tight mb-2">${evt.eventName}</h3>
+                        <p class="text-sm text-gray-500 flex items-center mt-2">
+                            <i data-feather="calendar" class="w-4 h-4 mr-2"></i> ${startDate}
+                        </p>
+                    </div>
+                    <div class="mt-auto pt-4 border-t border-gray-100 flex justify-between items-center">
+                        <span class="text-sm font-semibold text-indigo-600">Register Now &rarr;</span>
+                    </div>
                 `;
                 grid.appendChild(card);
             });
+            feather.replace();
 
         } catch (err) {
             $('catalogError').textContent = 'Error connecting to the server.';
-            $('catalogError').style.display = 'block';
+            $('catalogError').classList.remove('hidden');
         }
     }
 
@@ -868,13 +504,13 @@
 
             if (!res.ok || !json.success) {
                 $('eventLoadError').textContent = json.message || 'Event not found.';
-                $('eventLoadError').style.display = 'block';
+                $('eventLoadError').classList.remove('hidden');
                 return;
             }
 
             eventData = json.data;
 
-            $('pageTitle').textContent = 'Register — ' + eventData.eventName;
+            $('pageTitle').textContent = 'REGISTER';
             document.title = 'Register — ' + eventData.eventName + ' | Sindhu Runners';
             $('eventNameDisplay').textContent = eventData.eventName;
             $('eventDateDisplay').textContent = formatDate(eventData.eventDate);
@@ -884,16 +520,21 @@
             catContainer.innerHTML = '';
             eventData.categories.forEach(cat => {
                 catContainer.innerHTML += `
-                    <div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:0.85rem;">
-                        <span>${cat.categoryName} (${cat.minAge}-${cat.maxAge} Yrs)</span>
-                        <span style="font-weight:600; color:var(--success);">${formatCurrency(cat.fee)}</span>
+                    <div class="flex justify-between items-center pb-2 border-b border-gray-200 last:border-0 last:pb-0">
+                        <span class="text-gray-600">${cat.categoryName} <span class="text-xs text-gray-400 ml-1">(${cat.minAge}-${cat.maxAge} yrs)</span></span>
+                        <span class="font-semibold text-gray-900">${formatCurrency(cat.fee)}</span>
                     </div>
                 `;
             });
 
             const open = eventData.active;
-            $('statusBadge').textContent = open ? '✓ Registration Open' : '✗ Registration Closed';
-            $('statusBadge').className = open ? 'badge-open' : 'badge-closed';
+            if (open) {
+                $('statusBadge').textContent = '✓ Registration Open';
+                $('statusBadge').className = 'inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-800';
+            } else {
+                $('statusBadge').textContent = '✗ Registration Closed';
+                $('statusBadge').className = 'inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-red-100 text-red-800';
+            }
 
             $('eventInfo').style.display = 'block';
 
@@ -904,7 +545,7 @@
 
         } catch (err) {
             $('eventLoadError').textContent = 'Network error. Please refresh the page.';
-            $('eventLoadError').style.display = 'block';
+            $('eventLoadError').classList.remove('hidden');
         }
     }
 
@@ -924,7 +565,7 @@
         if(!eventData) return;
         const dobStr = this.value;
         if(!dobStr) {
-            $('regSummaryCard').classList.remove('visible');
+            $('regSummaryCard').classList.add('hidden');
             checkFormValidity();
             return;
         }
@@ -943,11 +584,13 @@
         if (matchedCat) {
             $('summaryCategory').textContent = matchedCat.categoryName;
             $('summaryFee').textContent = formatCurrency(matchedCat.fee);
-            $('regSummaryCard').classList.add('visible');
+            $('summaryFee').className = 'text-lg font-bold text-green-600';
+            $('regSummaryCard').classList.remove('hidden');
         } else {
             $('summaryCategory').textContent = 'Not Eligible (Age limit)';
             $('summaryFee').textContent = '—';
-            $('regSummaryCard').classList.add('visible');
+            $('summaryFee').className = 'text-lg font-bold text-red-500';
+            $('regSummaryCard').classList.remove('hidden');
         }
         checkFormValidity();
     });
@@ -971,12 +614,11 @@
             return;
         }
 
-        const icons = { 'application/pdf': '📋', 'image/jpeg': '🖼️', 'image/png': '🖼️' };
-        $('filePreviewIcon').textContent = icons[file.type] || '📄';
         $('filePreviewName').textContent = file.name;
         $('filePreviewSize').textContent = formatBytes(file.size);
-        filePreview.classList.add('visible');
-        uploadZone.style.display = 'none';
+        filePreview.classList.remove('hidden');
+        filePreview.classList.add('flex');
+        uploadZone.classList.add('hidden');
         checkFormValidity();
     }
 
@@ -986,8 +628,9 @@
 
     $('fileRemove').addEventListener('click', () => {
         fileInput.value = '';
-        filePreview.classList.remove('visible');
-        uploadZone.style.display = 'block';
+        filePreview.classList.add('hidden');
+        filePreview.classList.remove('flex');
+        uploadZone.classList.remove('hidden');
         checkFormValidity();
     });
 
@@ -1026,7 +669,6 @@
                                  $('consentTerms').checked;
 
         const hasFile = fileInput.files.length > 0;
-        
         const btn = $('registerBtn');
         if (eligible && requiredConsents && hasFile) {
             btn.disabled = false;
@@ -1099,15 +741,12 @@
                 description: regData.description,
                 order_id:    regData.razorpayOrderId,
                 image:       'images/SindhuRunnerLogo02-04.png',
-
                 prefill: {
                     name:    regData.fullName,
                     email:   regData.email,
                     contact: $('mobileNumber').value.trim()
                 },
-
-                theme: { color: '#1a6fc4' },
-
+                theme: { color: '#0A3D62' },
                 modal: {
                     ondismiss: function () {
                         btn.disabled = false;
@@ -1115,7 +754,6 @@
                         showAlert('Payment was cancelled. You can try again.');
                     }
                 },
-
                 handler: async function (response) {
                     showOverlay('Verifying payment…', 'Please wait while we confirm your payment.');
 
@@ -1137,7 +775,7 @@
                         }
 
                         const d = verifyJson.data;
-                        const params = new URLSearchParams({
+                        const redirectData = {
                             regId:  d.registrationId,
                             regNum: d.registrationNumber || '',
                             event:  d.eventName,
@@ -1145,7 +783,13 @@
                             category: d.categoryName || '',
                             amount: d.amount,
                             status: d.status
-                        });
+                        };
+                        const params = new URLSearchParams(redirectData);
+                        
+                        try {
+                            localStorage.setItem('latestRegistration', JSON.stringify(redirectData));
+                        } catch (e) {}
+
                         hideOverlay();
                         window.location.href = 'registration-success.html?' + params.toString();
 

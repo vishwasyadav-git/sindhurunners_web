@@ -164,11 +164,11 @@ public class PaymentService {
         payment.setRazorpayPaymentId(razorpayPaymentId);
         payment.setRazorpaySignature(razorpaySignature);
         payment.setStatus(PaymentStatus.CAPTURED);
-        paymentRepository.save(payment);
+        paymentRepository.saveAndFlush(payment);
 
         registration.setStatus(RegistrationStatus.PAID);
         registration.setRegistrationNumber(registrationNumber);
-        registrationRepository.save(registration);
+        registrationRepository.saveAndFlush(registration);
 
         log.info("Payment captured. registrationId=[{}] registrationNumber=[{}] orderId=[{}] paymentId=[{}]",
                 registration.getId(), registrationNumber, razorpayOrderId, razorpayPaymentId);

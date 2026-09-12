@@ -5,310 +5,81 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard — Sindhu Runners</title>
 
+    <!-- Tailwind CSS, AOS, Feather Icons -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <link rel="icon" type="image/x-icon" href="/images/SindhuRunnerLogo02-04.png">
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;500;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 
     <style>
-        /* ─── Reset & Base ─────────────────────────────────────────────────── */
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-        :root {
-            --primary:       #1a6fc4;
-            --primary-dark:  #134fa3;
-            --accent:        #e67e22;
-            --success:       #27ae60;
-            --danger:        #e74c3c;
-            --text:          #1c2333;
-            --text-muted:    #5a6478;
-            --border:        #d4dce8;
-            --bg-grad-start: #b8d9f0;
-            --bg-grad-mid:   #aee6d8;
-            --bg-grad-end:   #add8e6;
-            --card-bg:       rgba(255,255,255,0.92);
-            --card-shadow:   0 8px 30px rgba(26,111,196,0.1), 0 2px 10px rgba(0,0,0,0.05);
-            --radius:        16px;
-            --radius-sm:     8px;
-            --transition:    0.22s ease;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(160deg, var(--bg-grad-start) 0%, var(--bg-grad-mid) 50%, var(--bg-grad-end) 100%);
-            min-height: 100vh;
-            color: var(--text);
-        }
-
-        /* ─── Header ────────────────────────────────────────────────────────── */
-        .site-header {
-            background: rgba(255,255,255,0.85);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid var(--border);
-            padding: 12px 24px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-        }
-
-        .title-block h1 {
-            font-family: 'Roboto Condensed', sans-serif;
-            font-size: 1.4rem;
-            font-weight: 700;
-            color: var(--primary-dark);
-            letter-spacing: 0.5px;
-        }
-        .title-block p {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-        }
-
-        .back-link {
-            color: var(--primary);
-            text-decoration: none;
-            font-size: 0.85rem;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            transition: color var(--transition);
-        }
-        .back-link:hover { color: var(--primary-dark); }
-
-        /* ─── Main Layout ───────────────────────────────────────────────────── */
-        .page-wrapper {
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 40px 20px 80px;
-        }
-
-        .header-actions {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            margin-bottom: 30px;
-        }
-
-        .page-title {
-            font-family: 'Roboto Condensed', sans-serif;
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--primary-dark);
-            letter-spacing: 0.5px;
-        }
-
-        .btn-create {
-            padding: 10px 20px;
-            background: linear-gradient(135deg, var(--primary) 0%, #1a8fc4 100%);
-            color: #fff;
-            border: none;
-            border-radius: var(--radius-sm);
-            font-size: 0.95rem;
-            font-family: 'Roboto Condensed', sans-serif;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            cursor: pointer;
-            text-decoration: none;
-            transition: all var(--transition);
-            box-shadow: 0 4px 15px rgba(26,111,196,0.3);
-        }
-        .btn-create:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(26,111,196,0.4);
-        }
-
-        /* ─── Grid & Cards ──────────────────────────────────────────────────── */
-        .events-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 24px;
-        }
-
-        .event-card {
-            background: var(--card-bg);
-            border-radius: var(--radius);
-            box-shadow: var(--card-shadow);
-            backdrop-filter: blur(6px);
-            border: 1px solid rgba(255,255,255,0.6);
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            transition: transform var(--transition), box-shadow var(--transition);
-        }
-        .event-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 12px 40px rgba(26,111,196,0.15), 0 4px 12px rgba(0,0,0,0.06);
-        }
-
-        .card-header {
-            padding: 20px;
-            background: linear-gradient(135deg, #f8fafd 0%, #e8f1fc 100%);
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-        }
-        .card-header-main h3 {
-            font-family: 'Roboto Condensed', sans-serif;
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: var(--text);
-            margin-bottom: 4px;
-        }
-        .card-header-main p {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            font-family: monospace;
-            background: #dde5f0;
-            display: inline-block;
-            padding: 2px 6px;
-            border-radius: 4px;
-        }
-
-        .status-badge {
-            font-size: 0.75rem;
-            font-weight: 600;
-            padding: 4px 8px;
-            border-radius: 12px;
-            text-transform: uppercase;
-        }
-        .status-badge.active {
-            background: #eaf9ef;
-            color: #1e7e34;
-            border: 1px solid #b2dfcc;
-        }
-        .status-badge.inactive {
-            background: #fdf0ee;
-            color: #922b21;
-            border: 1px solid #f5c6c0;
-        }
-
-        .card-body {
-            padding: 20px;
-            flex: 1;
-        }
-
-        .info-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 12px;
-            font-size: 0.9rem;
-        }
-        .info-label {
-            color: var(--text-muted);
-            font-weight: 500;
-        }
-        .info-value {
-            font-weight: 600;
-            color: var(--text);
-        }
-
-        .card-footer {
-            padding: 16px 20px;
-            border-top: 1px solid var(--border);
-            display: flex;
-            gap: 12px;
-            background: #fff;
-        }
-
-        .btn-edit, .btn-delete, .btn-dashboard {
-            flex: 1;
-            padding: 8px;
-            text-align: center;
-            border-radius: var(--radius-sm);
-            font-size: 0.85rem;
-            font-weight: 600;
-            cursor: pointer;
-            text-decoration: none;
-            transition: all var(--transition);
-        }
-        
-        .btn-dashboard {
-            background: #eaf9ef;
-            color: #1e7e34;
-            border: 1px solid #b2dfcc;
-        }
-        .btn-dashboard:hover {
-            background: #d4f3e1;
-        }
-
-        .btn-edit {
-            background: var(--primary-light);
-            color: var(--primary-dark);
-            border: 1px solid #cce0f5;
-        }
-        .btn-edit:hover {
-            background: #d9eaf7;
-        }
-        
-        .btn-delete {
-            background: #fdf0ee;
-            color: var(--danger);
-            border: 1px solid #f5c6c0;
-        }
-        .btn-delete:hover {
-            background: #fadbd8;
-        }
-
-        /* ─── Global alert ──────────────────────────────────────────────────── */
-        .alert {
-            padding: 14px 18px;
-            border-radius: var(--radius-sm);
-            font-size: 0.88rem;
-            margin-bottom: 20px;
-            display: none;
-            line-height: 1.5;
-        }
-        .alert.visible { display: block; }
-        .alert-error { background: #fdf0ee; border: 1px solid #f5c6c0; color: #922b21; }
-        .alert-success { background: #eaf9ef; border: 1px solid #b2dfcc; color: #1e7e34; }
-
-        .loading-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: var(--text-muted);
-            font-size: 1.1rem;
-            grid-column: 1 / -1;
-        }
-
+        body { font-family: 'Inter', sans-serif; }
+        .font-condensed { font-family: 'Roboto Condensed', sans-serif; }
     </style>
 </head>
-<body>
+<body class="bg-gray-50 text-gray-800 min-h-screen">
 
-    <header class="site-header">
-        <div class="title-block">
-            <h1>Sindhu Runners</h1>
-            <p>Admin Dashboard</p>
-        </div>
-        <div style="display: flex; gap: 16px; align-items: center;">
-            <a href="index.html" class="back-link">← Back to Home</a>
-            <a href="#" class="back-link" style="color: var(--danger);" onclick="logout()">Logout</a>
-        </div>
-    </header>
-
-    <div class="page-wrapper">
-        
-        <div class="header-actions">
-            <div>
-                <h1 class="page-title">Events Overview</h1>
+    <!-- Navigation -->
+    <nav class="bg-[#0A3D62] shadow-lg sticky top-0 w-full z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <img src="images/SindhuRunnerLogo02-04.png" alt="Logo" class="h-10 w-10 mr-2 rounded-full">
+                    <span class="text-xl font-bold text-white font-condensed tracking-wide">ADMIN PORTAL</span>
+                </div>
+                <div class="flex items-center space-x-6">
+                    <a href="index.html" class="text-white hover:text-gray-300 font-medium text-sm flex items-center transition hidden sm:flex">
+                        <i data-feather="home" class="w-4 h-4 mr-1"></i> Main Site
+                    </a>
+                    <button onclick="logout()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-1.5 rounded-full text-sm font-semibold transition flex items-center shadow-sm">
+                        <i data-feather="log-out" class="w-4 h-4 mr-1"></i> Logout
+                    </button>
+                </div>
             </div>
-            <a href="admin-create-event.html" class="btn-create">+ Create New Event</a>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        
+        <!-- Header Section -->
+        <div class="flex flex-col sm:flex-row justify-between items-center mb-8" data-aos="fade-down">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900 font-condensed tracking-wide">Events Overview</h1>
+                <p class="text-gray-500 mt-1">Manage all your upcoming and past events.</p>
+            </div>
+            <a href="admin-create-event.html" class="mt-4 sm:mt-0 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-6 rounded-full shadow-md hover:shadow-lg transition flex items-center">
+                <i data-feather="plus" class="w-5 h-5 mr-1"></i> Create New Event
+            </a>
         </div>
 
-        <div id="globalAlert" class="alert alert-error"></div>
-        <div id="successAlert" class="alert alert-success"></div>
-
-        <div class="events-grid" id="eventsGrid">
-            <div class="loading-state">Loading events...</div>
+        <!-- Alerts -->
+        <div id="globalAlert" class="hidden mb-6 bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded shadow-sm items-center">
+            <i data-feather="alert-circle" class="w-5 h-5 mr-2"></i><span id="globalAlertText"></span>
+        </div>
+        <div id="successAlert" class="hidden mb-6 bg-green-50 border-l-4 border-green-500 text-green-700 p-4 rounded shadow-sm items-center">
+            <i data-feather="check-circle" class="w-5 h-5 mr-2"></i><span id="successAlertText"></span>
         </div>
 
-    </div>
+        <!-- Events Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="eventsGrid" data-aos="fade-up" data-aos-delay="100">
+            <div class="col-span-full py-20 text-center">
+                <i data-feather="loader" class="animate-spin w-8 h-8 text-indigo-500 mx-auto mb-3"></i>
+                <p class="text-gray-500">Loading events...</p>
+            </div>
+        </div>
+
+    </main>
 
     <script>
+        // Initialize icons & animations
+        feather.replace();
+        AOS.init({ once: true });
+
         const API_BASE = (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost') && window.location.port !== '8080'
             ? 'http://localhost:8080/api/v1/admin'
             : '/api/v1/admin';
@@ -326,12 +97,27 @@
         }
 
         function showAlert(msg, isSuccess = false) {
-            const el = isSuccess ? $('successAlert') : $('globalAlert');
-            const other = isSuccess ? $('globalAlert') : $('successAlert');
-            other.classList.remove('visible');
-            el.textContent = msg;
-            el.classList.add('visible');
-            setTimeout(() => el.classList.remove('visible'), 5000);
+            const errEl = $('globalAlert');
+            const errText = $('globalAlertText');
+            const succEl = $('successAlert');
+            const succText = $('successAlertText');
+            
+            errEl.classList.add('hidden');
+            errEl.classList.remove('flex');
+            succEl.classList.add('hidden');
+            succEl.classList.remove('flex');
+            
+            if (isSuccess) {
+                succText.textContent = msg;
+                succEl.classList.remove('hidden');
+                succEl.classList.add('flex');
+                setTimeout(() => { succEl.classList.add('hidden'); succEl.classList.remove('flex'); }, 5000);
+            } else {
+                errText.textContent = msg;
+                errEl.classList.remove('hidden');
+                errEl.classList.add('flex');
+                setTimeout(() => { errEl.classList.add('hidden'); errEl.classList.remove('flex'); }, 5000);
+            }
         }
 
         async function loadEvents() {
@@ -354,14 +140,28 @@
 
                 const events = json.data;
                 if (events.length === 0) {
-                    grid.innerHTML = `<div class="loading-state">No events found. Create one to get started!</div>`;
+                    grid.innerHTML = `
+                        <div class="col-span-full py-20 text-center bg-white rounded-xl border border-gray-200 border-dashed">
+                            <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-400">
+                                <i data-feather="calendar" class="w-8 h-8"></i>
+                            </div>
+                            <h3 class="text-lg font-bold text-gray-900 mb-1">No events found</h3>
+                            <p class="text-gray-500 mb-4">Get started by creating your first event.</p>
+                            <a href="admin-create-event.html" class="inline-flex items-center bg-indigo-50 text-indigo-700 font-semibold px-4 py-2 rounded-lg hover:bg-indigo-100 transition">
+                                <i data-feather="plus" class="w-4 h-4 mr-1"></i> Create Event
+                            </a>
+                        </div>
+                    `;
+                    feather.replace();
                     return;
                 }
 
                 grid.innerHTML = '';
                 events.forEach(ev => {
-                    const statusClass = ev.active ? 'active' : 'inactive';
-                    const statusText = ev.active ? 'Active' : 'Disabled';
+                    const isActive = ev.active;
+                    const statusBg = isActive ? 'bg-green-100 text-green-800 border-green-200' : 'bg-red-50 text-red-700 border-red-200';
+                    const statusText = isActive ? 'Active' : 'Disabled';
+                    const statusIcon = isActive ? 'check-circle' : 'x-circle';
                     
                     const dateObj = new Date(ev.eventDate);
                     const formattedDate = dateObj.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
@@ -370,40 +170,67 @@
                     const closeDate = closeObj.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
 
                     const card = document.createElement('div');
-                    card.className = 'event-card';
+                    card.className = 'bg-white rounded-xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-100 overflow-hidden flex flex-col';
                     card.innerHTML = `
-                        <div class="card-header">
-                            <div class="card-header-main">
-                                <h3>${ev.eventName}</h3>
-                                <p>${ev.eventCode}</p>
+                        <div class="p-6 bg-gradient-to-br from-gray-50 to-white border-b border-gray-100 relative">
+                            <span class="absolute top-4 right-4 inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold border ${statusBg}">
+                                <i data-feather="${statusIcon}" class="w-3 h-3 mr-1"></i> ${statusText}
+                            </span>
+                            <div class="mt-4 mb-1">
+                                <h3 class="font-condensed text-xl font-bold text-gray-900 leading-tight pr-20 truncate" title="${ev.eventName}">${ev.eventName}</h3>
                             </div>
-                            <span class="status-badge ${statusClass}">${statusText}</span>
+                            <span class="inline-block bg-gray-200 text-gray-600 text-xs px-2 py-0.5 rounded font-mono font-semibold tracking-wider">${ev.eventCode}</span>
                         </div>
-                        <div class="card-body">
-                            <div class="info-row">
-                                <span class="info-label">Event Date:</span>
-                                <span class="info-value">${formattedDate}</span>
-                            </div>
-                            <div class="info-row">
-                                <span class="info-label">Reg Closes:</span>
-                                <span class="info-value">${closeDate}</span>
-                            </div>
-                            <div class="info-row">
-                                <span class="info-label">Categories:</span>
-                                <span class="info-value">${ev.categories.length}</span>
+                        
+                        <div class="p-6 flex-grow">
+                            <div class="space-y-3">
+                                <div class="flex justify-between items-center text-sm">
+                                    <span class="text-gray-500 font-medium flex items-center"><i data-feather="calendar" class="w-4 h-4 mr-2 text-indigo-400"></i> Event Date</span>
+                                    <span class="font-semibold text-gray-900">${formattedDate}</span>
+                                </div>
+                                <div class="flex justify-between items-center text-sm">
+                                    <span class="text-gray-500 font-medium flex items-center"><i data-feather="clock" class="w-4 h-4 mr-2 text-indigo-400"></i> Reg. Closes</span>
+                                    <span class="font-semibold text-gray-900">${closeDate}</span>
+                                </div>
+                                <div class="flex justify-between items-center text-sm">
+                                    <span class="text-gray-500 font-medium flex items-center"><i data-feather="users" class="w-4 h-4 mr-2 text-indigo-400"></i> Categories</span>
+                                    <span class="font-semibold text-gray-900 inline-flex items-center justify-center bg-gray-100 rounded-full h-6 w-6">${ev.categories.length}</span>
+                                </div>
                             </div>
                         </div>
-                        <div class="card-footer">
-                            <a href="admin-event-dashboard.html?id=${ev.id}" class="btn-dashboard" onclick="localStorage.setItem('dashboardEventId', '${ev.id}')">Dashboard</a>
-                            <a href="admin-update-event.html?id=${ev.id}" class="btn-edit" onclick="localStorage.setItem('editEventId', '${ev.id}')">Edit</a>
-                            ${ev.active ? `<button class="btn-delete" onclick="disableEvent(${ev.id}, '${ev.eventName}')">Disable</button>` : `<button class="btn-delete" disabled style="opacity: 0.5; cursor: not-allowed">Disabled</button>`}
+                        
+                        <div class="bg-gray-50 p-4 border-t border-gray-100 grid grid-cols-3 gap-2">
+                            <a href="admin-event-dashboard.html?id=${ev.id}" onclick="localStorage.setItem('dashboardEventId', '${ev.id}')" 
+                                class="col-span-1 bg-white border border-gray-200 hover:border-indigo-300 hover:bg-indigo-50 text-indigo-700 rounded-lg py-2 flex flex-col items-center justify-center transition shadow-sm group">
+                                <i data-feather="bar-chart-2" class="w-4 h-4 mb-1 group-hover:scale-110 transition-transform"></i>
+                                <span class="text-[10px] font-bold uppercase tracking-wider">Stats</span>
+                            </a>
+                            <a href="admin-update-event.html?id=${ev.id}" onclick="localStorage.setItem('editEventId', '${ev.id}')" 
+                                class="col-span-1 bg-white border border-gray-200 hover:border-blue-300 hover:bg-blue-50 text-blue-700 rounded-lg py-2 flex flex-col items-center justify-center transition shadow-sm group">
+                                <i data-feather="edit-3" class="w-4 h-4 mb-1 group-hover:scale-110 transition-transform"></i>
+                                <span class="text-[10px] font-bold uppercase tracking-wider">Edit</span>
+                            </a>
+                            <button onclick="disableEvent(${ev.id}, '${ev.eventName.replace(/'/g, "\\'")}')" ${!isActive ? 'disabled' : ''} 
+                                class="col-span-1 bg-white border border-gray-200 ${isActive ? 'hover:border-red-300 hover:bg-red-50 text-red-600' : 'opacity-50 text-gray-400 cursor-not-allowed'} rounded-lg py-2 flex flex-col items-center justify-center transition shadow-sm group">
+                                <i data-feather="${isActive ? 'slash' : 'lock'}" class="w-4 h-4 mb-1 ${isActive ? 'group-hover:scale-110 transition-transform' : ''}"></i>
+                                <span class="text-[10px] font-bold uppercase tracking-wider">${isActive ? 'Disable' : 'Disabled'}</span>
+                            </button>
                         </div>
                     `;
                     grid.appendChild(card);
                 });
+                
+                feather.replace();
 
             } catch (err) {
-                grid.innerHTML = `<div class="loading-state" style="color:var(--danger)">Error: ${err.message}</div>`;
+                grid.innerHTML = `
+                    <div class="col-span-full py-10 bg-red-50 text-red-600 rounded-xl border border-red-200 text-center">
+                        <i data-feather="alert-triangle" class="w-8 h-8 mx-auto mb-2"></i>
+                        <p class="font-semibold">Failed to load events</p>
+                        <p class="text-sm mt-1">${err.message}</p>
+                    </div>
+                `;
+                feather.replace();
             }
         }
 
