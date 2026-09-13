@@ -11,6 +11,8 @@
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script src="https://unpkg.com/feather-icons"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <link rel="icon" type="image/x-icon" href="/images/SindhuRunnerLogo02-04.png">
 
     <!-- Fonts -->
@@ -178,8 +180,8 @@
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700 mb-1" for="dob">Date of Birth *</label>
-                                            <input type="date" id="dob" name="dob" required
-                                                class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition shadow-sm bg-white">
+                                            <input type="date" id="dob" name="dob" required placeholder="Select Date of Birth"
+                                                class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition shadow-sm bg-white cursor-pointer">
                                         </div>
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700 mb-1" for="gender">Gender *</label>
@@ -228,12 +230,12 @@
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700 mb-1" for="mobileNumber">Mobile Number *</label>
-                                            <input type="tel" id="mobileNumber" name="mobileNumber" placeholder="10-digit number" pattern="[6-9]\d{9}" required
+                                            <input type="tel" id="mobileNumber" name="mobileNumber" placeholder="10-digit number" pattern="[6-9]\d{9}" minlength="10" maxlength="10" title="Please enter a valid 10-digit mobile number starting with 6-9." required
                                                 class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition shadow-sm bg-white">
                                         </div>
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700 mb-1" for="emailId">Email ID *</label>
-                                            <input type="email" id="emailId" name="emailId" placeholder="email@example.com" required
+                                            <input type="email" id="emailId" name="emailId" placeholder="email@example.com" pattern="[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,}$" title="Please enter a valid email address." required
                                                 class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition shadow-sm bg-white">
                                         </div>
                                     </div>
@@ -265,7 +267,7 @@
                                         </div>
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700 mb-1" for="pinCode">PIN Code *</label>
-                                            <input type="text" id="pinCode" name="pinCode" required
+                                            <input type="text" id="pinCode" name="pinCode" placeholder="6-digit PIN" pattern="\d{6}" minlength="6" maxlength="6" title="Please enter a valid 6-digit PIN code." required
                                                 class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition shadow-sm bg-white">
                                         </div>
                                     </div>
@@ -283,7 +285,7 @@
                                     </div>
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-1" for="emergencyContactNumber">Contact Number *</label>
-                                        <input type="tel" id="emergencyContactNumber" name="emergencyContactNumber" required
+                                        <input type="tel" id="emergencyContactNumber" name="emergencyContactNumber" placeholder="10-digit number" pattern="[6-9]\d{9}" minlength="10" maxlength="10" title="Please enter a valid 10-digit mobile number." required
                                             class="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition shadow-sm bg-white">
                                     </div>
                                 </div>
@@ -375,6 +377,16 @@
     // Initialize icons & animations
     feather.replace();
     AOS.init({ once: true, offset: 50, duration: 600 });
+    
+    // Initialize Flatpickr for a smoother DOB experience
+    flatpickr("#dob", {
+        dateFormat: "Y-m-d",
+        maxDate: "today",
+        disableMobile: "true", // Uses native date picker on mobile for best UX
+        onChange: function(selectedDates, dateStr, instance) {
+            document.getElementById('dob').dispatchEvent(new Event('change'));
+        }
+    });
 
     const API_BASE = (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost') && window.location.port !== '8080'
         ? 'http://localhost:8080/api/v1'
