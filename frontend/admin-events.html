@@ -10,6 +10,8 @@
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script src="https://unpkg.com/feather-icons"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <link rel="icon" type="image/x-icon" href="/images/SindhuRunnerLogo02-04.png">
 
     <!-- Fonts -->
@@ -57,13 +59,7 @@
             </a>
         </div>
 
-        <!-- Alerts -->
-        <div id="globalAlert" class="hidden mb-6 bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded shadow-sm items-center">
-            <i data-feather="alert-circle" class="w-5 h-5 mr-2"></i><span id="globalAlertText"></span>
-        </div>
-        <div id="successAlert" class="hidden mb-6 bg-green-50 border-l-4 border-green-500 text-green-700 p-4 rounded shadow-sm items-center">
-            <i data-feather="check-circle" class="w-5 h-5 mr-2"></i><span id="successAlertText"></span>
-        </div>
+        <!-- Alerts handled by Toastify -->
 
         <!-- Events Grid -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="eventsGrid" data-aos="fade-up" data-aos-delay="100">
@@ -97,27 +93,18 @@
         }
 
         function showAlert(msg, isSuccess = false) {
-            const errEl = $('globalAlert');
-            const errText = $('globalAlertText');
-            const succEl = $('successAlert');
-            const succText = $('successAlertText');
-            
-            errEl.classList.add('hidden');
-            errEl.classList.remove('flex');
-            succEl.classList.add('hidden');
-            succEl.classList.remove('flex');
-            
-            if (isSuccess) {
-                succText.textContent = msg;
-                succEl.classList.remove('hidden');
-                succEl.classList.add('flex');
-                setTimeout(() => { succEl.classList.add('hidden'); succEl.classList.remove('flex'); }, 5000);
-            } else {
-                errText.textContent = msg;
-                errEl.classList.remove('hidden');
-                errEl.classList.add('flex');
-                setTimeout(() => { errEl.classList.add('hidden'); errEl.classList.remove('flex'); }, 5000);
-            }
+            Toastify({
+                text: msg,
+                duration: 4000,
+                gravity: "top",
+                position: "right",
+                style: {
+                    background: isSuccess ? "#10B981" : "#EF4444",
+                    borderRadius: "8px",
+                    fontWeight: "500",
+                    boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)"
+                }
+            }).showToast();
         }
 
         async function loadEvents() {

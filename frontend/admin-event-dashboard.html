@@ -10,6 +10,8 @@
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script src="https://unpkg.com/feather-icons"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <link rel="icon" type="image/x-icon" href="/images/SindhuRunnerLogo02-04.png">
 
     <!-- Fonts -->
@@ -224,9 +226,24 @@
         const urlParams = new URLSearchParams(window.location.search);
         const eventId = urlParams.get('id') || localStorage.getItem('dashboardEventId');
 
+        function showToast(msg, isSuccess = false) {
+            Toastify({
+                text: msg,
+                duration: 4000,
+                gravity: "top",
+                position: "right",
+                style: {
+                    background: isSuccess ? "#10B981" : "#EF4444",
+                    borderRadius: "8px",
+                    fontWeight: "500",
+                    boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)"
+                }
+            }).showToast();
+        }
+
         if (!eventId) {
-            alert('No Event ID provided.');
-            window.location.href = 'admin-events.html';
+            showToast('No Event ID provided.');
+            setTimeout(() => { window.location.href = 'admin-events.html'; }, 1500);
         }
 
         let currentPage = 0;
@@ -291,7 +308,7 @@
                 window.URL.revokeObjectURL(downloadUrl);
             })
             .catch(err => {
-                alert('Export failed: ' + err.message);
+                showToast('Export failed: ' + err.message);
             })
             .finally(() => {
                 btn.innerHTML = originalHtml;
@@ -354,7 +371,7 @@
 
             } catch (err) {
                 console.error(err);
-                alert("Failed to load dashboard data");
+                showToast("Failed to load dashboard data");
             } finally {
                 loading.classList.remove('flex');
                 loading.classList.add('hidden');
@@ -380,6 +397,7 @@
                 }
             } catch (err) {
                 console.error(err);
+                showToast("Failed to load registrations: " + err.message);
             }
         }
 
